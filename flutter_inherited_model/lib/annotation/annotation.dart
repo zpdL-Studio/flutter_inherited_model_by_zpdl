@@ -9,9 +9,3 @@ final class FlutterInheritedModelState {
 }
 
 const inheritedModelState = FlutterInheritedModelState();
-
-final class FlutterInheritedModelEvent {
-  const FlutterInheritedModelEvent();
-}
-
-const inheritedModelEvent = FlutterInheritedModelEvent();

@@ -105,6 +105,15 @@ class FlutterInheritedModelBuilder
       ),
     );
 
+    bool lifeCycle = false;
+    for(final mixin in element.mixins) {
+      switch('$mixin') {
+        case 'FlutterInheritedModelLifeCycle':
+          lifeCycle = true;
+          break;
+      }
+    }
+
     code.writeln(
       _buildInheritedModelState(
         name: inheritedModelStateName,
@@ -112,6 +121,7 @@ class FlutterInheritedModelBuilder
         modelName: modelName,
         constructorParameters: constructorParameters,
         fields: fields,
+        lifeCycle: lifeCycle,
       ),
     );
 
@@ -122,7 +132,7 @@ class FlutterInheritedModelBuilder
         fields: fields,
       ),
     );
-    print(code.toString());
+
     return code.toString();
   }
 }
@@ -290,16 +300,18 @@ extension _FlutterInheritedModelBuilderInheritedModelState
     required String modelName,
     required List<ParameterElement> constructorParameters,
     required List<FieldElement> fields,
+    required bool lifeCycle,
   }) {
     return '''
 class $name extends State<$inheritedModelName> {
   late final $modelName _model;
   
-${__initState(modelName, constructorParameters)}
+${__initState(modelName, constructorParameters, lifeCycle)}
 
   @override
   void dispose() {
     _model._setState = null;
+    ${lifeCycle ? '_model.onDispose();' : ''}
     super.dispose();
   }
   
@@ -318,6 +330,7 @@ ${fields.combineString(6, (e) => '${e.name}: _model.${e.name},')}
   String __initState(
     String modelName,
     List<ParameterElement> constructorParameters,
+    bool lifeCycle,
   ) {
     final code = CodeWriter(indent: 1);
     code.writeln('@override');
@@ -331,6 +344,9 @@ ${fields.combineString(6, (e) => '${e.name}: _model.${e.name},')}
         code.writeln('${parameter.name}: widget.${parameter.name},');
       }
       code.writeln(');', false);
+    }
+    if (lifeCycle) {
+      code.writeln('_model.onInit();');
     }
     code.writeln('_model._setState = setState;');
     code.writeln('}', false);
