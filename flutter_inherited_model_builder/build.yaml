@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      flutter_inherited_model|flutter_inherited_model_builder:
+        enabled: true
+
+builders:
+  flutter_inherited_model:
+      target: ":flutter_inherited_model_builder"
+      import: "package:flutter_inherited_model_builder/flutter_inherited_model_builder.dart"
+      builder_factories: ["flutterInheritedModelBuilder"]
+      build_extensions: {".dart":[".flutter_inherited_model.g.part"]}
+      auto_apply: dependents
+      build_to: cache
+      applies_builders: ["source_gen|combining_builder"]

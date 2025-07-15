@@ -1,7 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_inherited_model/flutter_inherited_model.dart';
+
+part 'main.g.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+@FlutterInheritedModel(name: 'MyAppInheritedModel')
+class MyAppModel {
+  @inheritedModelState
+  late int count;
+
+  @inheritedModelState
+  int countConstruct;
+  final String stringConstruct1;
+  final String stringConstruct2;
+  String? stringConstruct3;
+
+  final int intConstruct1;
+  final int intConstruct2;
+  @inheritedModelState
+  int? intConstruct3;
+
+  MyAppModel({
+    required this.countConstruct,
+    required this.stringConstruct1,
+    this.stringConstruct2 = '123',
+    this.stringConstruct3,
+    required this.intConstruct1,
+    this.intConstruct2 = 123,
+    this.intConstruct3,
+  });
+
+  @inheritedModelEvent
+  void onIncrement() {
+    count = count + 1;
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -75,6 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return Scaffold(
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
