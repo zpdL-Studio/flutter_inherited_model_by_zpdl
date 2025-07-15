@@ -48,10 +48,11 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final model = MyAppInheritedModel.read(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(MyAppInheritedModel.read(context).title),
+        title: Text(model.title),
       ),
       body: Center(
         child: Column(
@@ -70,7 +71,7 @@ class MyHomePage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: MyAppInheritedModel.read(context).onIncrement,
+        onPressed: model.onIncrement,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
