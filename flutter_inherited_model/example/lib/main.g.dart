@@ -11,11 +11,22 @@ class MyAppInheritedModel extends StatefulWidget {
     return context.getInheritedWidgetOfExactType<_MyAppInheritedModel>()!.model;
   }
 
+  static MyAppModel? maybeRead(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<_MyAppInheritedModel>()?.model;
+  }
+
   static int countOf(BuildContext context) {
     return InheritedModel.inheritFrom<_MyAppInheritedModel>(
       context,
       aspect: 0,
     )!.count;
+  }
+
+  static int? maybeCountOf(BuildContext context) {
+    return InheritedModel.inheritFrom<_MyAppInheritedModel>(
+      context,
+      aspect: 0,
+    )?.count;
   }
 
   static int countConstructOf(BuildContext context) {
@@ -25,11 +36,18 @@ class MyAppInheritedModel extends StatefulWidget {
     )!.countConstruct;
   }
 
+  static int? maybeCountConstructOf(BuildContext context) {
+    return InheritedModel.inheritFrom<_MyAppInheritedModel>(
+      context,
+      aspect: 1,
+    )?.countConstruct;
+  }
+
   static int? intConstruct3Of(BuildContext context) {
     return InheritedModel.inheritFrom<_MyAppInheritedModel>(
       context,
       aspect: 2,
-    )!.intConstruct3;
+    )?.intConstruct3;
   }
 
   const MyAppInheritedModel({
@@ -172,12 +190,10 @@ class _MyAppInheritedModel extends InheritedModel<int> {
     if (count != oldWidget.count && dependencies.contains(0)) {
       return true;
     }
-
     if (countConstruct != oldWidget.countConstruct &&
         dependencies.contains(1)) {
       return true;
     }
-
     if (intConstruct3 != oldWidget.intConstruct3 && dependencies.contains(2)) {
       return true;
     }

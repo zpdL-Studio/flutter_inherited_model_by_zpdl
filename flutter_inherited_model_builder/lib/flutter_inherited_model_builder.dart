@@ -90,6 +90,7 @@ class FlutterInheritedModelBuilder
         name: inheritedModelName,
         elementName: element.name,
         inheritedModelWidgetName: inheritedModelWidgetName,
+        inheritedModelStateName: inheritedModelStateName,
         constructorParameters: constructorParameters,
         fields: fields,
       ),
@@ -121,7 +122,7 @@ class FlutterInheritedModelBuilder
         fields: fields,
       ),
     );
-
+    print(code.toString());
     return code.toString();
   }
 }
@@ -143,50 +144,58 @@ extension _FlutterInheritedModelBuilderModel on FlutterInheritedModelBuilder {
     required List<ParameterElement> constructorParameters,
     required List<FieldElement> fields,
   }) {
-    final code = CodeWriter();
-    code.writeln('class $name extends $elementName {', true);
-    code.writeln('$name({', true);
-    code.writeln(_buildModelConstructParameters(constructorParameters));
-    code.writeln('});', false);
-    code.ln();
-    code.writeln('StateSetter? _setState;');
-    code.ln();
-    for (final field in fields) {
-      code.writeln('@override');
-      code.writeln('set ${field.name}(${field.type} value) {', true);
-      code.writeln('final setState = _setState;');
-      code.writeln('if (setState == null) {', true);
-      code.writeln('super.${field.name} = value;');
-      code.writeln('return;');
-      code.writeln('}', false);
-      code.writeln('setState(() {', true);
-      code.writeln('super.${field.name} = value;');
-      code.writeln('});', false);
-      code.writeln('}', false);
-    }
-    code.writeln('}', false);
-    return code.toString();
+    return '''
+class $name extends $elementName {
+${CodeWriter()..writelnWithIndent(__buildModelConstruct(name, constructorParameters))}
+  
+  StateSetter? _setState;
+  
+${CodeWriter()..writelnWithIndent(fields.fold('', (previousValue, element) {
+      return '$previousValue\n${__buildModelFields(element)}';
+    }))}
+}
+''';
   }
 
-  String _buildModelConstructParameters(List<ParameterElement> parameters) {
-    final sb = StringBuffer();
-    for (final parameter in parameters) {
-      if (sb.isNotEmpty) {
-        sb.write(', ');
-      }
-      final name = parameter.name;
-      if (parameter.isRequiredNamed) {
+  String __buildModelConstruct(String name, List<ParameterElement> parameter) {
+    if (parameter.isEmpty) {
+      return '$name();';
+    }
+    return '''
+$name({
+${parameter.combineString(2, (e) {
+      final sb = StringBuffer();
+      final name = e.name;
+      if (e.isRequiredNamed) {
         sb.write('required super.$name');
-      } else if (parameter.isOptionalNamed) {
+      } else if (e.isOptionalNamed) {
         sb.write('super.$name');
       }
 
-      if (parameter.hasDefaultValue) {
-        sb.write(' = ${parameter.defaultValueCode}');
+      if (e.hasDefaultValue) {
+        sb.write(' = ${e.defaultValueCode}');
       }
-    }
+      sb.write(',');
+      return sb.toString();
+    })}
+});
+''';
+  }
 
-    return sb.toString();
+  String __buildModelFields(FieldElement field) {
+    return '''
+@override
+set ${field.name}(${field.type} value) {
+  final setState = _setState;
+  if (setState == null) {
+    super.${field.name} = value;
+    return;
+  }
+  setState(() {
+    super.${field.name} = value;
+  });
+}
+    ''';
   }
 }
 
@@ -196,71 +205,79 @@ extension _FlutterInheritedModelBuilderInheritedModel
     required String name,
     required String elementName,
     required String inheritedModelWidgetName,
+    required String inheritedModelStateName,
     required List<ParameterElement> constructorParameters,
     required List<FieldElement> fields,
   }) {
-    final code = CodeWriter();
-    code.writeln('class $name extends StatefulWidget {', true);
-    code.ln();
-
-    code.writeln('static $elementName read(BuildContext context) {', true);
-    code.writeln('return context.getInheritedWidgetOfExactType<$inheritedModelWidgetName>()!.model;');
-    code.writeln('}', false);
-    code.ln();
-
-    for (int i = 0; i < fields.length; i++) {
-      final field = fields[i];
-      code.writeln(
-          'static ${field.type} ${field.name}Of(BuildContext context) {', true);
-      code.writeln(
-          'return InheritedModel.inheritFrom<$inheritedModelWidgetName>(context, aspect: $i)!.${field
-              .name};');
-      code.writeln('}', false);
-      code.ln();
-    }
-
-    code.writeln('const $name({', true);
-    code.writeln(
-      _buildInheritedModelConstructParameters(constructorParameters),
-    );
-    code.writeln('});', false);
-    code.ln();
-
-    for (final parameter in constructorParameters) {
-      if (parameter.isRequiredNamed || parameter.isOptionalNamed) {
-        code.writeln('final ${parameter.type} ${parameter.name};');
-      }
-    }
-    code.writeln('final Widget child;');
-    code.ln();
-
-    code.writeln('@override');
-    code.writeln('State<$name> createState() => _${name}State();');
-
-    code.writeln('}', false);
-
-    return code.toString();
+    return '''
+class $name extends StatefulWidget {
+  static $elementName read(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<$inheritedModelWidgetName>()!.model;
   }
-
-  String _buildInheritedModelConstructParameters(
-    List<ParameterElement> parameters,
-  ) {
-    final sb = StringBuffer();
-    sb.write('super.key, ');
-    for (final parameter in parameters) {
-      final name = parameter.name;
-      if (parameter.isRequiredNamed) {
+  
+  static $elementName? maybeRead(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<$inheritedModelWidgetName>()?.model;
+  }
+  
+${CodeWriter()..writelnWithIndent(__buildInheritedModelOf(inheritedModelWidgetName, fields))}
+  const $name({
+    super.key,
+${constructorParameters.combineString(4, (e) {
+      final sb = StringBuffer();
+      final name = e.name;
+      if (e.isRequiredNamed) {
         sb.write('required this.$name');
-      } else if (parameter.isOptionalNamed) {
+      } else if (e.isOptionalNamed) {
         sb.write('this.$name');
       }
 
-      if (parameter.hasDefaultValue) {
-        sb.write(' = ${parameter.defaultValueCode}');
+      if (e.hasDefaultValue) {
+        sb.write(' = ${e.defaultValueCode}');
       }
-      sb.write(', ');
+      sb.write(',');
+      return sb.toString();
+    })}
+    required this.child,
+  });
+
+${constructorParameters.combineString(2, (e) {
+      return 'final ${e.type} ${e.name};';
+    })}
+  final Widget child;
+  
+  @override
+  State<$name> createState() => $inheritedModelStateName();
+}
+''';
+  }
+
+  String __buildInheritedModelOf(
+    String inheritedModelWidgetName,
+    List<FieldElement> fields,
+  ) {
+    final sb = StringBuffer();
+    for (int i = 0; i < fields.length; i++) {
+      final field = fields[i];
+
+      if (field.isOptional()) {
+        sb.writeln('''
+static ${field.type} ${field.name}Of(BuildContext context) {
+  return InheritedModel.inheritFrom<$inheritedModelWidgetName>(context, aspect: $i)?.${field.name};
+}
+''');
+      } else {
+        sb.writeln('''
+static ${field.type} ${field.name}Of(BuildContext context) {
+  return InheritedModel.inheritFrom<$inheritedModelWidgetName>(context, aspect: $i)!.${field.name};
+}
+
+static ${field.type}? maybe${field.name.substring(0, 1).toUpperCase()}${field.name.substring(1)}Of(BuildContext context) {
+  return InheritedModel.inheritFrom<$inheritedModelWidgetName>(context, aspect: $i)?.${field.name};
+}
+''');
+      }
     }
-    sb.write('required this.child');
+
     return sb.toString();
   }
 }
@@ -274,38 +291,35 @@ extension _FlutterInheritedModelBuilderInheritedModelState
     required List<ParameterElement> constructorParameters,
     required List<FieldElement> fields,
   }) {
-    final code = CodeWriter();
-    code.writeln(
-        'class $name extends State<$inheritedModelName> {', true
+    return '''
+class $name extends State<$inheritedModelName> {
+  late final $modelName _model;
+  
+${__initState(modelName, constructorParameters)}
+
+  @override
+  void dispose() {
+    _model._setState = null;
+    super.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return _$inheritedModelName(
+${fields.combineString(6, (e) => '${e.name}: _model.${e.name},')}
+      model: _model,
+      child: widget.child,
     );
-    code.writeln('late final $modelName _model;');
-    code.ln();
-
-    code.writeln(__initState(modelName, constructorParameters));
-    code.ln();
-
-    code.writeln('@override');
-    code.writeln('void dispose() {', true);
-    code.writeln('_model._setState = null;');
-    code.writeln('super.dispose();');
-    code.writeln('}', false);
-    code.ln();
-
-    code.writeln('@override');
-    code.writeln('Widget build(BuildContext context) {', true);
-    code.writeln(
-      'return _$inheritedModelName(${_buildInheritedModelStateFields(fields)});',
-    );
-    code.writeln('}', false);
-
-    code.writeln('}', false);
-
-    return code.toString();
+  }
+}
+    ''';
   }
 
-  String __initState(String modelName,
-      List<ParameterElement> constructorParameters) {
-    final code = CodeWriter();
+  String __initState(
+    String modelName,
+    List<ParameterElement> constructorParameters,
+  ) {
+    final code = CodeWriter(indent: 1);
     code.writeln('@override');
     code.writeln('void initState() {', true);
     code.writeln('super.initState();');
@@ -322,17 +336,6 @@ extension _FlutterInheritedModelBuilderInheritedModelState
     code.writeln('}', false);
     return code.toString();
   }
-
-  String _buildInheritedModelStateFields(List<FieldElement> fields) {
-    final sb = StringBuffer();
-    for (final field in fields) {
-      sb.write('${field.name}: _model.${field.name}');
-      sb.write(', ');
-    }
-    sb.write('model: _model, ');
-    sb.write('child: widget.child');
-    return sb.toString();
-  }
 }
 
 extension _FlutterInheritedModelBuilderInheritedModelWidget
@@ -342,65 +345,89 @@ extension _FlutterInheritedModelBuilderInheritedModelWidget
     required String modelName,
     required List<FieldElement> fields,
   }) {
-    final code = CodeWriter();
-    code.writeln('class $name extends InheritedModel<int> {', true);
+    return '''
+class $name extends InheritedModel<int> {
+${fields.combineString(2, (e) => 'final ${e.type} ${e.name};')}
+  final $modelName model;
+  
+  const $name({
+${fields.combineString(4, (e) => 'required this.${e.name},')}
+    required this.model,
+    required super.child,
+  });
+
+  @override
+  bool updateShouldNotify($name oldWidget) {
+    return ${__updateShouldNotify(fields)};
+  }
+
+  @override
+  bool updateShouldNotifyDependent($name oldWidget, Set<int> dependencies) {
+${__updateShouldNotifyDependent(fields)}
+
+    return false;
+  }
+}
+    ''';
+  }
+
+  String __updateShouldNotify(List<FieldElement> fields) {
+    if (fields.isEmpty) {
+      return 'true';
+    }
+    final sb = StringBuffer();
     for (final field in fields) {
-      code.writeln('final ${field.type} ${field.name};');
-    }
-    code.writeln('final $modelName model;');
-    code.ln();
-
-    code.writeln('const $name({', true);
-    for (final field in fields) {
-      code.writeln('required this.${field.name},');
-    }
-    code.writeln('required this.model,');
-    code.writeln('required super.child,');
-    code.writeln('});', false);
-    code.ln();
-
-    code.writeln('@override');
-    code.writeln('bool updateShouldNotify($name oldWidget) {', true);
-    String updateShouldNotify(List<FieldElement> fields) {
-      if (fields.isEmpty) {
-        return 'true';
+      if (sb.isNotEmpty) {
+        sb.write(' || ');
       }
-      final sb = StringBuffer();
-      for (final field in fields) {
-        if (sb.isNotEmpty) {
-          sb.write(' || ');
-        }
-        sb.write('${field.name} != oldWidget.${field.name}');
+      sb.write('${field.name} != oldWidget.${field.name}');
+    }
+    return sb.toString();
+  }
+
+  String __updateShouldNotifyDependent(List<FieldElement> fields) {
+    final sb = CodeWriter();
+    sb.writeIndent((code) {
+      for (int i = 0; i < fields.length; i++) {
+        final field = fields[i];
+        final name = field.name;
+        code.writeln(
+          'if ($name != oldWidget.$name && dependencies.contains($i)) {',
+        );
+        code.writeIndent((code) {
+          code.writeln('return true;');
+        });
+        code.writeln('}');
       }
-      return sb.toString();
+    }, 2);
+
+    return sb.toString();
+  }
+}
+
+extension ListFold<T> on List<T> {
+  String combineString(int indent, String Function(T) combine) {
+    final indentString = ' ' * indent;
+    final sb = StringBuffer();
+    for (final item in this) {
+      if (sb.isNotEmpty) {
+        sb.writeln();
+      }
+      sb.write('$indentString${combine(item)}');
     }
+    return sb.toString();
+  }
+}
 
-    code.writeln('return ${updateShouldNotify(fields)};');
-    code.writeln('}', false);
-    code.ln();
+extension _FieldElementUtils on FieldElement {
+  bool isOptional() {
+    final type = '${this.type}';
 
-    code.writeln('@override');
-    code.writeln(
-      'bool updateShouldNotifyDependent($name oldWidget, Set<int> dependencies) {',
-      true
-    );
-    for (int i = 0; i < fields.length; i++) {
-      final field = fields[i];
-      code.writeln(
-        'if (${field.name} != oldWidget.${field.name} && dependencies.contains($i)) {',
-        true
-      );
-      code.writeln('return true;');
-      code.writeln('}', false);
-      code.ln();
+    if (type.endsWith('?')) {
+      return true;
+    } else if (type == 'dynamic') {
+      return true;
     }
-    code.ln();
-    code.writeln('return false;');
-    code.writeln('}', false);
-    code.ln();
-
-    code.writeln('}', false);
-
-    return code.toString();
+    return false;
   }
 }

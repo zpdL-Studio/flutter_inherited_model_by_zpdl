@@ -1,31 +1,38 @@
 class CodeWriter {
   final sb = StringBuffer();
   int _indent = 0;
+  final String _indentString;
 
-  CodeWriter();
+  CodeWriter({int indent = 0, String indentString = '  '})
+      : _indent = indent,
+        _indentString = indentString;
 
   void writeln([Object? obj = "", bool? indent]) {
+    if (indent == false) {
+      _indent--;
+    }
     for (var i = 0; i < _indent; i++) {
-      sb.write('\t');
+      sb.write(_indentString);
     }
     sb.writeln(obj);
-    if (indent != null) {
-      if (indent) {
-        _indent++;
-      } else {
-        _indent--;
-      }
+    if (indent == true) {
+      _indent++;
     }
   }
 
-  void writeIndent(
-      String opening,
-      String closing,
-      void Function(CodeWriter writer) onWrite,
-      ) {
-    writeln(opening, true);
+  void writeIndent(void Function(CodeWriter writer) onWrite,
+      [int indentCount = 1]) {
+    _indent += indentCount;
     onWrite(this);
-    writeln(closing, false);
+    _indent -= indentCount;
+  }
+
+  void writelnWithIndent(String object, [int indentCount = 1]) {
+    _indent += indentCount;
+    for(final o in object.split('\n')) {
+      writeln(o);
+    }
+    _indent -= indentCount;
   }
 
   void writelnCurlyBrace(
@@ -35,6 +42,14 @@ class CodeWriter {
     writeln('$opening {', true);
     onWrite(this);
     writeln('}', false);
+  }
+
+  void openIndent(int count) {
+    _indent += count;
+  }
+
+  void closeIndent(int count) {
+    _indent -= count;
   }
 
   void ln() {
