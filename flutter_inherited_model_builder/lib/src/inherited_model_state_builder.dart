@@ -35,7 +35,7 @@ class InheritedModelStateBuilder {
         _buildDidUpdateWidget(inheritedModelName, constructorParameters),
       );
     }
-    code.write(_buildDispose());
+    code.write(_buildDispose(annotation));
     code.write(_build(inheritedModelWidgetName, constructorParameters, fields));
     code.closeIndent();
     code.write('}');
@@ -144,11 +144,11 @@ void didUpdateWidget($inheritedModelName oldWidget) {
     return code.toString();
   }
 
-  static String _buildDispose() {
+  static String _buildDispose(AnnotationInfo annotation) {
     return '''
 @override
 void dispose() {
-  _model._\$event = null;
+  ${annotation.event != null ? '_model._\$event = null;' : ''}
   _model._\$setState = null;
   _model.dispose();
   super.dispose();

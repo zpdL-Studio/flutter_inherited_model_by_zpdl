@@ -19,7 +19,7 @@ class ModelBuilder {
     code.write('StateSetter? _\$setState;');
     code.line();
     if (constructorParameters == null || constructorParameters.isEmpty) {
-      code.write('$name(): super._()');
+      code.write('$name(): super._();');
     } else {
       for (final e in constructorParameters) {
         code.write('${e.type} ${getConstructorName(e.name)};');

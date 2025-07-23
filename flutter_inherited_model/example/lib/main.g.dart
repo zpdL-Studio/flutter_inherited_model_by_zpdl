@@ -206,3 +206,84 @@ class _MyAppCountInheritedModel extends InheritedModel<int> {
     return false;
   }
 }
+
+mixin $MyAppCountModel2 {
+  void initState() {}
+
+  void didUpdateWidget() {}
+
+  void dispose() {}
+}
+
+class MyAppCount2InheritedModel extends StatefulWidget {
+  static MyAppCountModel2 model(BuildContext context) {
+    return context
+        .getInheritedWidgetOfExactType<_MyAppCount2InheritedModel>()!
+        .model;
+  }
+
+  static MyAppCountModel2? maybeModel(BuildContext context) {
+    return context
+        .getInheritedWidgetOfExactType<_MyAppCount2InheritedModel>()
+        ?.model;
+  }
+
+  const MyAppCount2InheritedModel({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<MyAppCount2InheritedModel> createState() =>
+      _MyAppCount2InheritedModelState();
+}
+
+class _$MyAppCountModel2 extends MyAppCountModel2 {
+  StateSetter? _$setState;
+
+  _$MyAppCountModel2() : super._();
+}
+
+class _MyAppCount2InheritedModelState extends State<MyAppCount2InheritedModel> {
+  late final _$MyAppCountModel2 _model;
+  bool _isFrameDraw = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _model = _$MyAppCountModel2();
+    _model.initState();
+    _model._$setState = setState;
+  }
+
+  @override
+  void dispose() {
+    _model._$setState = null;
+    _model.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _isFrameDraw = true;
+    return _MyAppCount2InheritedModel(model: _model, child: widget.child);
+  }
+}
+
+class _MyAppCount2InheritedModel extends InheritedModel<int> {
+  final _$MyAppCountModel2 model;
+
+  const _MyAppCount2InheritedModel({required this.model, required super.child});
+
+  @override
+  bool updateShouldNotify(_MyAppCount2InheritedModel oldWidget) {
+    return false;
+  }
+
+  @override
+  bool updateShouldNotifyDependent(
+    _MyAppCount2InheritedModel oldWidget,
+    Set<int> dependencies,
+  ) {
+    return false;
+  }
+}

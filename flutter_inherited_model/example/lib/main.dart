@@ -40,6 +40,17 @@ class MyAppCountModel with $MyAppCountModel {
 
 sealed class MyAppCountModelEvent {}
 
+@FlutterInheritedModel(
+  name: 'MyAppCount2InheritedModel'
+)
+class MyAppCountModel2 with $MyAppCountModel2 {
+  MyAppCountModel2._();
+
+  @override
+  void initState() {
+  }
+}
+
 class MyAppCountModelSnackBarEvent implements MyAppCountModelEvent {
   final String message;
 

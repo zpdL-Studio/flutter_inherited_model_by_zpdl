@@ -49,30 +49,11 @@ class FlutterInheritedModelBuilder
       );
     }
 
-    // final constructorElement = element.unnamedConstructor;
-    // if (constructorElement == null) {
-    //   throw InvalidGenerationSourceError(
-    //     'The generator could not find an unnamed constructor for this ${element.displayName} class.',
-    //     todo:
-    //         'Ensure the class has a default (unnamed) factory constructor, or adjust the annotation usage.',
-    //     element: element,
-    //   );
-    // }
-
     ConstructorElement? privateConstructor;
     ConstructorElement? factoryConstructor;
 
-    // print('constructorElement.isFactory: ${constructorElement
-    //     .isFactory}, ${constructorElement.name}');
-
     for (final constructor in element.constructors) {
-      print(
-        'constructor : ${constructor.name}, isDefaultConstructor: ${constructor.isDefaultConstructor}, isFactory: ${constructor.isFactory}',
-      );
       if (constructor.name == '' && constructor.isFactory) {
-        print(
-          'constructor : ${constructor.name} isDefaultConstructor , isFactory',
-        );
         factoryConstructor = constructor;
       } else if (constructor.name == '_' && !constructor.isFactory) {
         privateConstructor = constructor;
