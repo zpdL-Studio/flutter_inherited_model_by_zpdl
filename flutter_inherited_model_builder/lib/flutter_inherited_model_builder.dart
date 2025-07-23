@@ -4,9 +4,14 @@ import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:flutter_inherited_model/annotation/annotation.dart';
+import 'package:flutter_inherited_model_builder/src/annotation_builder.dart';
+import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
+import 'package:flutter_inherited_model_builder/src/inherited_model_builder.dart';
+import 'package:flutter_inherited_model_builder/src/inherited_model_state_builder.dart';
+import 'package:flutter_inherited_model_builder/src/inherited_model_widget_builder.dart';
+import 'package:flutter_inherited_model_builder/src/mixin_builder.dart';
+import 'package:flutter_inherited_model_builder/src/model_builder.dart';
 import 'package:source_gen/source_gen.dart';
-
-import 'code_writer.dart';
 
 Builder flutterInheritedModelBuilder(BuilderOptions options) =>
     SharedPartBuilder([
@@ -25,6 +30,9 @@ class FlutterInheritedModelBuilder
   ) async {
     print('FlutterInheritedModelBuilder -> element : ${element.name}');
 
+    final annotationInfo = AnnotationBuilder.getAnnotationInfo(annotation);
+    print('FlutterInheritedModelBuilder -> annotation : $annotationInfo');
+
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
         'Generator cannot be applied to ${element.displayName}.',
@@ -33,19 +41,73 @@ class FlutterInheritedModelBuilder
       );
     }
 
-    final constructorElement = element.unnamedConstructor;
-    if (constructorElement == null) {
+    if (element.isAbstract) {
       throw InvalidGenerationSourceError(
-        'The generator could not find an unnamed constructor for this ${element.displayName} class.',
-        todo:
-            'Ensure the class has a default (unnamed) factory constructor, or adjust the annotation usage.',
+        'Generator cannot be applied to abstract class ${element.displayName}.',
+        todo: 'This annotation can only be used on not abstract classes.',
         element: element,
       );
     }
 
-    final stateTypeChecker = TypeChecker.fromRuntime(
-      FlutterInheritedModelState,
-    );
+    // final constructorElement = element.unnamedConstructor;
+    // if (constructorElement == null) {
+    //   throw InvalidGenerationSourceError(
+    //     'The generator could not find an unnamed constructor for this ${element.displayName} class.',
+    //     todo:
+    //         'Ensure the class has a default (unnamed) factory constructor, or adjust the annotation usage.',
+    //     element: element,
+    //   );
+    // }
+
+    ConstructorElement? privateConstructor;
+    ConstructorElement? factoryConstructor;
+
+    // print('constructorElement.isFactory: ${constructorElement
+    //     .isFactory}, ${constructorElement.name}');
+
+    for (final constructor in element.constructors) {
+      print(
+        'constructor : ${constructor.name}, isDefaultConstructor: ${constructor.isDefaultConstructor}, isFactory: ${constructor.isFactory}',
+      );
+      if (constructor.name == '' && constructor.isFactory) {
+        print(
+          'constructor : ${constructor.name} isDefaultConstructor , isFactory',
+        );
+        factoryConstructor = constructor;
+      } else if (constructor.name == '_' && !constructor.isFactory) {
+        privateConstructor = constructor;
+      }
+    }
+
+    if (privateConstructor == null) {
+      throw InvalidGenerationSourceError(
+        'The generator could not find an "${element.displayName}._();" for this ${element.displayName}',
+        todo: 'Ensure the class has a "${element.displayName}._();"',
+        element: element,
+      );
+    }
+
+    final List<ParameterElement>? factoryConstructorParameters;
+    if (factoryConstructor != null) {
+      factoryConstructorParameters = <ParameterElement>[];
+      for (final parameter in factoryConstructor.parameters) {
+        if (parameter.isRequiredNamed || parameter.isOptionalNamed) {
+          factoryConstructorParameters.add(parameter);
+        } else {
+          final name = parameter.name;
+          throw InvalidGenerationSourceError(
+            'The construct parameter `$name` is only named parameter',
+            todo: 'Please ensure `$name` is changed named parameter',
+            element: parameter,
+          );
+        }
+      }
+    } else {
+      factoryConstructorParameters = null;
+    }
+
+    final stateTypeChecker = TypeChecker.fromRuntime(InheritedModelState);
+
     final fields = <FieldElement>[];
     for (final field in element.fields) {
       if (stateTypeChecker.hasAnnotationOf(field)) {
@@ -63,387 +125,65 @@ class FlutterInheritedModelBuilder
       }
     }
 
-    final constructorParameters = <ParameterElement>[];
-    for (final parameter in constructorElement.parameters) {
-      if (parameter.isRequiredNamed || parameter.isOptionalNamed) {
-        constructorParameters.add(parameter);
-      } else {
-        final name = parameter.name;
-        throw InvalidGenerationSourceError(
-          'The construct parameter `$name` is only named parameter',
-          todo: 'Please ensure `$name` is changed named parameter',
-          element: parameter,
-        );
-      }
-    }
+    final code = CodeIndentWriter();
 
-    final code = CodeWriter();
-
+    final mixinName = '\$${element.name}';
     final modelName = '_\$${element.name}';
     final inheritedModelName =
-        _getNameFromAnnotation(annotation) ?? '${element.name}InheritedModel';
+        annotationInfo.name ?? '${element.name}InheritedModel';
     final inheritedModelStateName = '_${inheritedModelName}State';
     final inheritedModelWidgetName = '_$inheritedModelName';
 
-    code.writeln(
-      _buildInheritedModel(
+    code.write(
+      MixinBuilder.build(
+        annotation: annotationInfo,
+        name: mixinName,
+        constructorParameters: factoryConstructorParameters,
+        fields: fields,
+      ),
+    );
+
+    code.write(
+      InheritedModelWidgetBuilder.build(
         name: inheritedModelName,
         elementName: element.name,
         inheritedModelWidgetName: inheritedModelWidgetName,
         inheritedModelStateName: inheritedModelStateName,
-        constructorParameters: constructorParameters,
+        constructorParameters: factoryConstructorParameters,
         fields: fields,
       ),
     );
 
-    code.writeln(
-      _buildModel(
+    code.write(
+      ModelBuilder.build(
         name: modelName,
         elementName: element.name,
-        constructorParameters: constructorParameters,
+        constructorParameters: factoryConstructorParameters,
         fields: fields,
       ),
     );
 
-    bool lifeCycle = false;
-    for(final mixin in element.mixins) {
-      switch('$mixin') {
-        case 'FlutterInheritedModelLifeCycle':
-          lifeCycle = true;
-          break;
-      }
-    }
-
-    code.writeln(
-      _buildInheritedModelState(
+    code.write(
+      InheritedModelStateBuilder.build(
+        annotation: annotationInfo,
         name: inheritedModelStateName,
         inheritedModelName: inheritedModelName,
         modelName: modelName,
-        constructorParameters: constructorParameters,
+        inheritedModelWidgetName: inheritedModelWidgetName,
+        constructorParameters: factoryConstructorParameters,
         fields: fields,
-        lifeCycle: lifeCycle,
       ),
     );
 
-    code.writeln(
-      _buildInheritedModelWidget(
+    code.write(
+      InheritedModelBuilder.build(
         name: inheritedModelWidgetName,
-        modelName: element.name,
+        modelName: modelName,
+        constructorParameters: factoryConstructorParameters,
         fields: fields,
       ),
     );
 
     return code.toString();
-  }
-}
-
-extension _FlutterInheritedModelBuilderUtil on FlutterInheritedModelBuilder {
-  String? _getNameFromAnnotation(ConstantReader annotation) {
-    final name = annotation.read('name');
-    if (name.isString) {
-      return name.stringValue;
-    }
-    return null;
-  }
-}
-
-extension _FlutterInheritedModelBuilderModel on FlutterInheritedModelBuilder {
-  String _buildModel({
-    required String name,
-    required String elementName,
-    required List<ParameterElement> constructorParameters,
-    required List<FieldElement> fields,
-  }) {
-    return '''
-class $name extends $elementName {
-${CodeWriter()..writelnWithIndent(__buildModelConstruct(name, constructorParameters))}
-  
-  StateSetter? _setState;
-  
-${CodeWriter()..writelnWithIndent(fields.fold('', (previousValue, element) {
-      return '$previousValue\n${__buildModelFields(element)}';
-    }))}
-}
-''';
-  }
-
-  String __buildModelConstruct(String name, List<ParameterElement> parameter) {
-    if (parameter.isEmpty) {
-      return '$name();';
-    }
-    return '''
-$name({
-${parameter.combineString(2, (e) {
-      final sb = StringBuffer();
-      final name = e.name;
-      if (e.isRequiredNamed) {
-        sb.write('required super.$name');
-      } else if (e.isOptionalNamed) {
-        sb.write('super.$name');
-      }
-
-      if (e.hasDefaultValue) {
-        sb.write(' = ${e.defaultValueCode}');
-      }
-      sb.write(',');
-      return sb.toString();
-    })}
-});
-''';
-  }
-
-  String __buildModelFields(FieldElement field) {
-    return '''
-@override
-set ${field.name}(${field.type} value) {
-  final setState = _setState;
-  if (setState == null) {
-    super.${field.name} = value;
-    return;
-  }
-  setState(() {
-    super.${field.name} = value;
-  });
-}
-    ''';
-  }
-}
-
-extension _FlutterInheritedModelBuilderInheritedModel
-    on FlutterInheritedModelBuilder {
-  String _buildInheritedModel({
-    required String name,
-    required String elementName,
-    required String inheritedModelWidgetName,
-    required String inheritedModelStateName,
-    required List<ParameterElement> constructorParameters,
-    required List<FieldElement> fields,
-  }) {
-    return '''
-class $name extends StatefulWidget {
-  static $elementName read(BuildContext context) {
-    return context.getInheritedWidgetOfExactType<$inheritedModelWidgetName>()!.model;
-  }
-  
-  static $elementName? maybeRead(BuildContext context) {
-    return context.getInheritedWidgetOfExactType<$inheritedModelWidgetName>()?.model;
-  }
-  
-${CodeWriter()..writelnWithIndent(__buildInheritedModelOf(inheritedModelWidgetName, fields))}
-  const $name({
-    super.key,
-${constructorParameters.combineString(4, (e) {
-      final sb = StringBuffer();
-      final name = e.name;
-      if (e.isRequiredNamed) {
-        sb.write('required this.$name');
-      } else if (e.isOptionalNamed) {
-        sb.write('this.$name');
-      }
-
-      if (e.hasDefaultValue) {
-        sb.write(' = ${e.defaultValueCode}');
-      }
-      sb.write(',');
-      return sb.toString();
-    })}
-    required this.child,
-  });
-
-${constructorParameters.combineString(2, (e) {
-      return 'final ${e.type} ${e.name};';
-    })}
-  final Widget child;
-  
-  @override
-  State<$name> createState() => $inheritedModelStateName();
-}
-''';
-  }
-
-  String __buildInheritedModelOf(
-    String inheritedModelWidgetName,
-    List<FieldElement> fields,
-  ) {
-    final sb = StringBuffer();
-    for (int i = 0; i < fields.length; i++) {
-      final field = fields[i];
-
-      if (field.isOptional()) {
-        sb.writeln('''
-static ${field.type} ${field.name}Of(BuildContext context) {
-  return InheritedModel.inheritFrom<$inheritedModelWidgetName>(context, aspect: $i)?.${field.name};
-}
-''');
-      } else {
-        sb.writeln('''
-static ${field.type} ${field.name}Of(BuildContext context) {
-  return InheritedModel.inheritFrom<$inheritedModelWidgetName>(context, aspect: $i)!.${field.name};
-}
-
-static ${field.type}? maybe${field.name.substring(0, 1).toUpperCase()}${field.name.substring(1)}Of(BuildContext context) {
-  return InheritedModel.inheritFrom<$inheritedModelWidgetName>(context, aspect: $i)?.${field.name};
-}
-''');
-      }
-    }
-
-    return sb.toString();
-  }
-}
-
-extension _FlutterInheritedModelBuilderInheritedModelState
-    on FlutterInheritedModelBuilder {
-  String _buildInheritedModelState({
-    required String name,
-    required String inheritedModelName,
-    required String modelName,
-    required List<ParameterElement> constructorParameters,
-    required List<FieldElement> fields,
-    required bool lifeCycle,
-  }) {
-    return '''
-class $name extends State<$inheritedModelName> {
-  late final $modelName _model;
-  
-${__initState(modelName, constructorParameters, lifeCycle)}
-
-  @override
-  void dispose() {
-    _model._setState = null;
-    ${lifeCycle ? '_model.onDispose();' : ''}
-    super.dispose();
-  }
-  
-  @override
-  Widget build(BuildContext context) {
-    return _$inheritedModelName(
-${fields.combineString(6, (e) => '${e.name}: _model.${e.name},')}
-      model: _model,
-      child: widget.child,
-    );
-  }
-}
-    ''';
-  }
-
-  String __initState(
-    String modelName,
-    List<ParameterElement> constructorParameters,
-    bool lifeCycle,
-  ) {
-    final code = CodeWriter(indent: 1);
-    code.writeln('@override');
-    code.writeln('void initState() {', true);
-    code.writeln('super.initState();');
-    if (constructorParameters.isEmpty) {
-      code.writeln('_model = $modelName();');
-    } else {
-      code.writeln('_model = $modelName(', true);
-      for (final parameter in constructorParameters) {
-        code.writeln('${parameter.name}: widget.${parameter.name},');
-      }
-      code.writeln(');', false);
-    }
-    if (lifeCycle) {
-      code.writeln('_model.onInit();');
-    }
-    code.writeln('_model._setState = setState;');
-    code.writeln('}', false);
-    return code.toString();
-  }
-}
-
-extension _FlutterInheritedModelBuilderInheritedModelWidget
-    on FlutterInheritedModelBuilder {
-  String _buildInheritedModelWidget({
-    required String name,
-    required String modelName,
-    required List<FieldElement> fields,
-  }) {
-    return '''
-class $name extends InheritedModel<int> {
-${fields.combineString(2, (e) => 'final ${e.type} ${e.name};')}
-  final $modelName model;
-  
-  const $name({
-${fields.combineString(4, (e) => 'required this.${e.name},')}
-    required this.model,
-    required super.child,
-  });
-
-  @override
-  bool updateShouldNotify($name oldWidget) {
-    return ${__updateShouldNotify(fields)};
-  }
-
-  @override
-  bool updateShouldNotifyDependent($name oldWidget, Set<int> dependencies) {
-${__updateShouldNotifyDependent(fields)}
-
-    return false;
-  }
-}
-    ''';
-  }
-
-  String __updateShouldNotify(List<FieldElement> fields) {
-    if (fields.isEmpty) {
-      return 'true';
-    }
-    final sb = StringBuffer();
-    for (final field in fields) {
-      if (sb.isNotEmpty) {
-        sb.write(' || ');
-      }
-      sb.write('${field.name} != oldWidget.${field.name}');
-    }
-    return sb.toString();
-  }
-
-  String __updateShouldNotifyDependent(List<FieldElement> fields) {
-    final sb = CodeWriter();
-    sb.writeIndent((code) {
-      for (int i = 0; i < fields.length; i++) {
-        final field = fields[i];
-        final name = field.name;
-        code.writeln(
-          'if ($name != oldWidget.$name && dependencies.contains($i)) {',
-        );
-        code.writeIndent((code) {
-          code.writeln('return true;');
-        });
-        code.writeln('}');
-      }
-    }, 2);
-
-    return sb.toString();
-  }
-}
-
-extension ListFold<T> on List<T> {
-  String combineString(int indent, String Function(T) combine) {
-    final indentString = ' ' * indent;
-    final sb = StringBuffer();
-    for (final item in this) {
-      if (sb.isNotEmpty) {
-        sb.writeln();
-      }
-      sb.write('$indentString${combine(item)}');
-    }
-    return sb.toString();
-  }
-}
-
-extension _FieldElementUtils on FieldElement {
-  bool isOptional() {
-    final type = '${this.type}';
-
-    if (type.endsWith('?')) {
-      return true;
-    } else if (type == 'dynamic') {
-      return true;
-    }
-    return false;
   }
 }

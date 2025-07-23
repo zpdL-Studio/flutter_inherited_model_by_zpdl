@@ -6,30 +6,58 @@ part of 'main.dart';
 // Generator: FlutterInheritedModelBuilder
 // **************************************************************************
 
-class MyAppInheritedModel extends StatefulWidget {
-  static MyAppModel read(BuildContext context) {
-    return context.getInheritedWidgetOfExactType<_MyAppInheritedModel>()!.model;
+mixin $MyAppCountModel {
+  String get title => throw UnimplementedError();
+
+  void initState() {}
+
+  void didUpdateWidget(String title) {}
+
+  void dispose() {}
+}
+
+class MyAppCountInheritedModel extends StatefulWidget {
+  static MyAppCountModel model(BuildContext context) {
+    return context
+        .getInheritedWidgetOfExactType<_MyAppCountInheritedModel>()!
+        .model;
   }
 
-  static MyAppModel? maybeRead(BuildContext context) {
-    return context.getInheritedWidgetOfExactType<_MyAppInheritedModel>()?.model;
+  static MyAppCountModel? maybeModel(BuildContext context) {
+    return context
+        .getInheritedWidgetOfExactType<_MyAppCountInheritedModel>()
+        ?.model;
+  }
+
+  static String titleOf(BuildContext context) {
+    return InheritedModel.inheritFrom<_MyAppCountInheritedModel>(
+      context,
+      aspect: 0,
+    )!.title;
+  }
+
+  static String? maybeTitleOf(BuildContext context) {
+    return InheritedModel.inheritFrom<_MyAppCountInheritedModel>(
+      context,
+      aspect: 0,
+    )?.title;
   }
 
   static int countOf(BuildContext context) {
-    return InheritedModel.inheritFrom<_MyAppInheritedModel>(
+    return InheritedModel.inheritFrom<_MyAppCountInheritedModel>(
       context,
-      aspect: 0,
+      aspect: 1,
     )!.count;
   }
 
   static int? maybeCountOf(BuildContext context) {
-    return InheritedModel.inheritFrom<_MyAppInheritedModel>(
+    return InheritedModel.inheritFrom<_MyAppCountInheritedModel>(
       context,
-      aspect: 0,
+      aspect: 1,
     )?.count;
   }
 
-  const MyAppInheritedModel({
+  const MyAppCountInheritedModel({
     super.key,
     required this.title,
     required this.child,
@@ -39,17 +67,23 @@ class MyAppInheritedModel extends StatefulWidget {
   final Widget child;
 
   @override
-  State<MyAppInheritedModel> createState() => _MyAppInheritedModelState();
+  State<MyAppCountInheritedModel> createState() =>
+      _MyAppCountInheritedModelState();
 }
 
-class _$MyAppModel extends MyAppModel {
-  _$MyAppModel({required super.title});
+class _$MyAppCountModel extends MyAppCountModel {
+  StateSetter? _$setState;
 
-  StateSetter? _setState;
+  String _$title;
+
+  _$MyAppCountModel({required String title}) : _$title = title, super._();
+
+  @override
+  String get title => _$title;
 
   @override
   set count(int value) {
-    final setState = _setState;
+    final setState = _$setState;
     if (setState == null) {
       super.count = value;
       return;
@@ -60,27 +94,38 @@ class _$MyAppModel extends MyAppModel {
   }
 }
 
-class _MyAppInheritedModelState extends State<MyAppInheritedModel> {
-  late final _$MyAppModel _model;
+class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
+  late final _$MyAppCountModel _model;
 
   @override
   void initState() {
     super.initState();
-    _model = _$MyAppModel(title: widget.title);
-    _model.onInit();
-    _model._setState = setState;
+    _model = _$MyAppCountModel(title: widget.title);
+    _model.initState();
+    _model._$setState = setState;
+  }
+
+  @override
+  void didUpdateWidget(MyAppCountInheritedModel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.title != oldWidget.title) {
+      _model.didUpdateWidget(widget.title);
+      _model._$title = widget.title;
+    }
   }
 
   @override
   void dispose() {
-    _model._setState = null;
-    _model.onDispose();
+    _model._$setState = null;
+    _model.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _MyAppInheritedModel(
+    return _MyAppCountInheritedModel(
+      title: _model.title,
       count: _model.count,
       model: _model,
       child: widget.child,
@@ -88,30 +133,34 @@ class _MyAppInheritedModelState extends State<MyAppInheritedModel> {
   }
 }
 
-class _MyAppInheritedModel extends InheritedModel<int> {
+class _MyAppCountInheritedModel extends InheritedModel<int> {
+  final String title;
   final int count;
-  final MyAppModel model;
+  final _$MyAppCountModel model;
 
-  const _MyAppInheritedModel({
+  const _MyAppCountInheritedModel({
+    required this.title,
     required this.count,
     required this.model,
     required super.child,
   });
 
   @override
-  bool updateShouldNotify(_MyAppInheritedModel oldWidget) {
-    return count != oldWidget.count;
+  bool updateShouldNotify(_MyAppCountInheritedModel oldWidget) {
+    return title != oldWidget.title || count != oldWidget.count;
   }
 
   @override
   bool updateShouldNotifyDependent(
-    _MyAppInheritedModel oldWidget,
+    _MyAppCountInheritedModel oldWidget,
     Set<int> dependencies,
   ) {
-    if (count != oldWidget.count && dependencies.contains(0)) {
+    if (dependencies.contains(0) && title != oldWidget.title) {
       return true;
     }
-
+    if (dependencies.contains(1) && count != oldWidget.count) {
+      return true;
+    }
     return false;
   }
 }

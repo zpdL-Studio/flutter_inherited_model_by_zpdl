@@ -7,21 +7,22 @@ void main() {
   runApp(const MyApp());
 }
 
-@FlutterInheritedModel(name: 'MyAppInheritedModel')
-class MyAppModel with FlutterInheritedModelLifeCycle {
-  final String title;
+@FlutterInheritedModel(name: 'MyAppCountInheritedModel')
+class MyAppCountModel with $MyAppCountModel {
   @inheritedModelState
   late int count;
 
-  MyAppModel({required this.title});
+  MyAppCountModel._();
+
+  factory MyAppCountModel({required String title}) = _$MyAppCountModel;
 
   @override
-  void onInit() {
+  void initState() {
     count = 0;
   }
 
-  void onIncrement() {
-    count = count + 1;
+  void onCountToZero() {
+    count = 0;
   }
 }
 
@@ -31,12 +32,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Inherited Model Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: MyAppInheritedModel(
-        title: 'Flutter Demo Home Page',
+      home: MyAppCountInheritedModel(
+        title: 'Flutter Inherited Model Page',
         child: MyHomePage(),
       ),
     );
@@ -48,11 +49,11 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final model = MyAppInheritedModel.read(context);
+    final model = MyAppCountInheritedModel.model(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(model.title),
+        title: Text(MyAppCountInheritedModel.titleOf(context)),
       ),
       body: Center(
         child: Column(
@@ -62,16 +63,23 @@ class MyHomePage extends StatelessWidget {
             Builder(
               builder: (context) {
                 return Text(
-                  '${MyAppInheritedModel.countOf(context)}',
+                  '${MyAppCountInheritedModel.countOf(context)}',
                   style: Theme.of(context).textTheme.headlineMedium,
                 );
               },
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: model.onCountToZero,
+              child: Text('Count to zero'),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: model.onIncrement,
+        onPressed: () {
+          model.count = model.count + 1;
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.

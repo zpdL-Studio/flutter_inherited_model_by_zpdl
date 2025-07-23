@@ -1,11 +1,12 @@
 final class FlutterInheritedModel {
   final String? name;
+  final bool useStateCycle;
 
-  const FlutterInheritedModel({this.name});
+  const FlutterInheritedModel({this.name, this.useStateCycle = true});
 }
 
-final class FlutterInheritedModelState {
-  const FlutterInheritedModelState();
+final class InheritedModelState {
+  const InheritedModelState();
 }
 
-const inheritedModelState = FlutterInheritedModelState();
+const inheritedModelState = InheritedModelState();

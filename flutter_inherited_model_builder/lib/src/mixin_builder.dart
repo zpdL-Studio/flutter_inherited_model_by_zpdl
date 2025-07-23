@@ -1,0 +1,48 @@
+// ignore_for_file: deprecated_member_use
+import 'package:analyzer/dart/element/element.dart';
+
+import 'annotation_builder.dart';
+import 'code_indent_writer.dart';
+
+class MixinBuilder {
+  static String build({
+    required AnnotationInfo annotation,
+    required String name,
+    required List<ParameterElement>? constructorParameters,
+    required List<FieldElement> fields,
+  }) {
+    final code = CodeIndentWriter();
+    code.write('mixin $name {');
+    code.openIndent();
+    code.line();
+    if (constructorParameters != null && constructorParameters.isNotEmpty) {
+      for (final e in constructorParameters) {
+        code.write('${e.type} get ${e.name} => throw UnimplementedError();');
+      }
+    }
+    code.line();
+    if (annotation.useStateCycle) {
+      final useStateParameter = StringBuffer();
+      if (constructorParameters != null && constructorParameters.isNotEmpty) {
+        for (final e in constructorParameters) {
+          if(useStateParameter.isNotEmpty) {
+            useStateParameter.write(', ');
+          }
+          useStateParameter.write('${e.type} ${e.name}');
+        }
+      }
+      code.write('''
+void initState() {}
+
+void didUpdateWidget($useStateParameter) {}
+
+void dispose() {}
+''');
+    }
+
+    code.closeIndent();
+    code.write('}');
+
+    return code.toString();
+  }
+}
