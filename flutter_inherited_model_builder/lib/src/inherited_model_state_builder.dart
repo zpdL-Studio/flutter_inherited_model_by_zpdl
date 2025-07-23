@@ -19,16 +19,12 @@ class InheritedModelStateBuilder {
     code.write('class $name extends State<$inheritedModelName> {');
     code.openIndent();
     code.write('late final $modelName _model;');
-    code.write('bool _isFrameDraw = false;');
+    if (annotation.event != null) {
+      code.write('bool _isFrameDraw = false;');
+    }
     code.line();
 
-    code.write(
-      _buildInitState(
-        annotation,
-        modelName,
-        constructorParameters,
-      ),
-    );
+    code.write(_buildInitState(annotation, modelName, constructorParameters));
 
     if (constructorParameters != null && constructorParameters.isNotEmpty) {
       code.write(
@@ -36,7 +32,14 @@ class InheritedModelStateBuilder {
       );
     }
     code.write(_buildDispose(annotation));
-    code.write(_build(inheritedModelWidgetName, constructorParameters, fields));
+    code.write(
+      _build(
+        annotation,
+        inheritedModelWidgetName,
+        constructorParameters,
+        fields,
+      ),
+    );
     code.closeIndent();
     code.write('}');
     // print('InheritedModelStateBuilder.builder ->\n${code.toString()}');
@@ -67,7 +70,7 @@ class InheritedModelStateBuilder {
     }
 
     final event = annotation.event;
-    if(event != null) {
+    if (event != null) {
       code.write('''
 _model._\$event = (e) async {
   final onEvent = widget.onEvent;
@@ -150,13 +153,14 @@ void didUpdateWidget($inheritedModelName oldWidget) {
 void dispose() {
   ${annotation.event != null ? '_model._\$event = null;' : ''}
   _model._\$setState = null;
-  _model.dispose();
+  ${annotation.useStateCycle ? '_model.dispose();' : ''}
   super.dispose();
 }
     ''';
   }
 
   static String _build(
+    AnnotationInfo annotation,
     String inheritedModelWidgetName,
     List<ParameterElement>? constructorParameters,
     List<FieldElement> fields,
@@ -166,15 +170,17 @@ void dispose() {
 @override
 Widget build(BuildContext context) {''');
     code.openIndent();
-    code.write('_isFrameDraw = true;');
+    if (annotation.event != null) {
+      code.write('_isFrameDraw = true;');
+    }
     code.write('return $inheritedModelWidgetName(');
     code.writeIndent((code) {
-      if(constructorParameters != null) {
-        for(final e in constructorParameters) {
+      if (constructorParameters != null) {
+        for (final e in constructorParameters) {
           code.write('${e.name}: _model.${e.name},');
         }
       }
-      for(final e in fields) {
+      for (final e in fields) {
         code.write('${e.name}: _model.${e.name},');
       }
       code.write('model: _model,');

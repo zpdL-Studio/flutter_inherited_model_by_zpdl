@@ -16,6 +16,7 @@ class ModelBuilder {
     code.write('class $name extends $elementName {');
     code.openIndent();
     code.line();
+    code.write('// ignore: unused_field');
     code.write('StateSetter? _\$setState;');
     code.line();
     if (constructorParameters == null || constructorParameters.isEmpty) {

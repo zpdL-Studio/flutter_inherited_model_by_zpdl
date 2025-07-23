@@ -84,6 +84,7 @@ class MyAppCountInheritedModel extends StatefulWidget {
 }
 
 class _$MyAppCountModel extends MyAppCountModel {
+  // ignore: unused_field
   StateSetter? _$setState;
 
   String _$title;
@@ -207,81 +208,68 @@ class _MyAppCountInheritedModel extends InheritedModel<int> {
   }
 }
 
-mixin $MyAppCountModel2 {
-  void initState() {}
+mixin $EmptyModel {}
 
-  void didUpdateWidget() {}
-
-  void dispose() {}
-}
-
-class MyAppCount2InheritedModel extends StatefulWidget {
-  static MyAppCountModel2 model(BuildContext context) {
-    return context
-        .getInheritedWidgetOfExactType<_MyAppCount2InheritedModel>()!
-        .model;
+class EmptyInheritedModel extends StatefulWidget {
+  static EmptyModel model(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<_EmptyInheritedModel>()!.model;
   }
 
-  static MyAppCountModel2? maybeModel(BuildContext context) {
-    return context
-        .getInheritedWidgetOfExactType<_MyAppCount2InheritedModel>()
-        ?.model;
+  static EmptyModel? maybeModel(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<_EmptyInheritedModel>()?.model;
   }
 
-  const MyAppCount2InheritedModel({super.key, required this.child});
+  const EmptyInheritedModel({super.key, required this.child});
 
   final Widget child;
 
   @override
-  State<MyAppCount2InheritedModel> createState() =>
-      _MyAppCount2InheritedModelState();
+  State<EmptyInheritedModel> createState() => _EmptyInheritedModelState();
 }
 
-class _$MyAppCountModel2 extends MyAppCountModel2 {
+class _$EmptyModel extends EmptyModel {
+  // ignore: unused_field
   StateSetter? _$setState;
 
-  _$MyAppCountModel2() : super._();
+  _$EmptyModel() : super._();
 }
 
-class _MyAppCount2InheritedModelState extends State<MyAppCount2InheritedModel> {
-  late final _$MyAppCountModel2 _model;
-  bool _isFrameDraw = false;
+class _EmptyInheritedModelState extends State<EmptyInheritedModel> {
+  late final _$EmptyModel _model;
 
   @override
   void initState() {
     super.initState();
-    _model = _$MyAppCountModel2();
-    _model.initState();
+    _model = _$EmptyModel();
     _model._$setState = setState;
   }
 
   @override
   void dispose() {
     _model._$setState = null;
-    _model.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    _isFrameDraw = true;
-    return _MyAppCount2InheritedModel(model: _model, child: widget.child);
+    return _EmptyInheritedModel(model: _model, child: widget.child);
   }
 }
 
-class _MyAppCount2InheritedModel extends InheritedModel<int> {
-  final _$MyAppCountModel2 model;
+class _EmptyInheritedModel extends InheritedModel<int> {
+  final _$EmptyModel model;
 
-  const _MyAppCount2InheritedModel({required this.model, required super.child});
+  const _EmptyInheritedModel({required this.model, required super.child});
 
   @override
-  bool updateShouldNotify(_MyAppCount2InheritedModel oldWidget) {
+  bool updateShouldNotify(_EmptyInheritedModel oldWidget) {
     return false;
   }
 
   @override
   bool updateShouldNotifyDependent(
-    _MyAppCount2InheritedModel oldWidget,
+    _EmptyInheritedModel oldWidget,
     Set<int> dependencies,
   ) {
     return false;

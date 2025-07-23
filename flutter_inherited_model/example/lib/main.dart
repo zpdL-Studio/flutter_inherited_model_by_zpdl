@@ -41,14 +41,11 @@ class MyAppCountModel with $MyAppCountModel {
 sealed class MyAppCountModelEvent {}
 
 @FlutterInheritedModel(
-  name: 'MyAppCount2InheritedModel'
+  name: 'EmptyInheritedModel',
+  useStateCycle: false
 )
-class MyAppCountModel2 with $MyAppCountModel2 {
-  MyAppCountModel2._();
-
-  @override
-  void initState() {
-  }
+class EmptyModel with $EmptyModel {
+  EmptyModel._();
 }
 
 class MyAppCountModelSnackBarEvent implements MyAppCountModelEvent {
