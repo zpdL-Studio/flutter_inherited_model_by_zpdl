@@ -7,13 +7,19 @@ part of 'main.dart';
 // **************************************************************************
 
 mixin $MyAppCountModel {
-  String get title => throw UnimplementedError();
+  String get title =>
+      throw UnimplementedError('title has not been implemented.');
 
   void initState() {}
 
   void didUpdateWidget(String title) {}
 
   void dispose() {}
+
+  Future<dynamic> emitEvent(MyAppCountModelEvent event) =>
+      throw UnimplementedError(
+        'emitEvent(MyAppCountModelEvent event) has not been implemented.',
+      );
 }
 
 class MyAppCountInheritedModel extends StatefulWidget {
@@ -60,10 +66,16 @@ class MyAppCountInheritedModel extends StatefulWidget {
   const MyAppCountInheritedModel({
     super.key,
     required this.title,
+    this.onEvent,
     required this.child,
   });
 
   final String title;
+  final Future<dynamic> Function(
+    MyAppCountModel model,
+    MyAppCountModelEvent event,
+  )?
+  onEvent;
   final Widget child;
 
   @override
@@ -92,15 +104,43 @@ class _$MyAppCountModel extends MyAppCountModel {
       super.count = value;
     });
   }
+
+  Future<dynamic> Function(MyAppCountModelEvent)? _$event;
+
+  @override
+  Future<dynamic> emitEvent(MyAppCountModelEvent event) async {
+    return await _$event?.call(event);
+  }
 }
 
 class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
   late final _$MyAppCountModel _model;
+  bool _isFrameDraw = false;
 
   @override
   void initState() {
     super.initState();
     _model = _$MyAppCountModel(title: widget.title);
+    _model._$event = (e) async {
+      final onEvent = widget.onEvent;
+      if (onEvent != null) {
+        if (!_isFrameDraw) {
+          final completer = Completer<dynamic>();
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            try {
+              completer.complete(await onEvent(_model, e));
+            } catch (e) {
+              completer.completeError(e);
+            }
+          });
+          return completer.future;
+        } else {
+          return await onEvent(_model, e);
+        }
+      }
+      return null;
+    };
+
     _model.initState();
     _model._$setState = setState;
   }
@@ -117,6 +157,7 @@ class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
 
   @override
   void dispose() {
+    _model._$event = null;
     _model._$setState = null;
     _model.dispose();
     super.dispose();
@@ -124,6 +165,7 @@ class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
 
   @override
   Widget build(BuildContext context) {
+    _isFrameDraw = true;
     return _MyAppCountInheritedModel(
       title: _model.title,
       count: _model.count,

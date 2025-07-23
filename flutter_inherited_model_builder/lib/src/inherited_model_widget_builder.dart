@@ -1,11 +1,14 @@
 // ignore_for_file: deprecated_member_use
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:flutter_inherited_model_builder/src/annotation_builder.dart';
+import 'package:flutter_inherited_model_builder/src/builder_util.dart';
 
 import 'code_indent_writer.dart';
 
 class InheritedModelWidgetBuilder {
   static String build({
+    required AnnotationInfo annotation,
     required String name,
     required String elementName,
     required String inheritedModelWidgetName,
@@ -26,11 +29,19 @@ static $elementName? maybeModel(BuildContext context) {
 }
 ''');
     code.line();
-    code.write(_buildInheritedModelOf(inheritedModelWidgetName, constructorParameters ?? [], fields));
+    code.write(
+      _buildInheritedModelOf(
+        inheritedModelWidgetName,
+        constructorParameters ?? [],
+        fields,
+      ),
+    );
     code.line();
-    code.write(_buildInheritedModelConstructor(name, constructorParameters));
+    code.write(
+      _buildInheritedModelConstructor(name, annotation, constructorParameters),
+    );
     code.line();
-    code.write(_buildInheritedModelField(constructorParameters));
+    code.write(_buildInheritedModelField(annotation, elementName, constructorParameters));
     code.line();
     code.write('''
 @override
@@ -44,13 +55,13 @@ State<$name> createState() => $inheritedModelStateName();
   }
 
   static String _buildInheritedModelOf(
-      String inheritedModelWidgetName,
-      List<ParameterElement> constructorParameters,
-      List<FieldElement> fields,
-      ) {
+    String inheritedModelWidgetName,
+    List<ParameterElement> constructorParameters,
+    List<FieldElement> fields,
+  ) {
     final parameter = <(DartType type, bool optional, String name)>[
       ...constructorParameters.map((e) => (e.type, e.isOptional, e.name)),
-      ...fields.map((e) => (e.type, e.isOptional(), e.name)),
+      ...fields.map((e) => (e.type, e.type.isOptional(), e.name)),
     ];
 
     final code = CodeIndentWriter();
@@ -79,17 +90,18 @@ static $type? maybe${name.substring(0, 1).toUpperCase()}${name.substring(1)}Of(B
   }
 
   static String _buildInheritedModelConstructor(
-      String name,
-      List<ParameterElement>? constructorParameters,
-      ) {
-    if(constructorParameters == null || constructorParameters.isEmpty) {
+    String name,
+    AnnotationInfo annotation,
+    List<ParameterElement>? constructorParameters,
+  ) {
+    if (constructorParameters == null || constructorParameters.isEmpty) {
       return 'const $name({super.key, required this.child});';
     }
     final code = CodeIndentWriter();
     code.write('const $name({');
     code.openIndent();
     code.write('super.key,');
-    for(final e in constructorParameters) {
+    for (final e in constructorParameters) {
       final sb = StringBuffer();
       final name = e.name;
       if (e.isRequiredNamed) {
@@ -104,6 +116,11 @@ static $type? maybe${name.substring(0, 1).toUpperCase()}${name.substring(1)}Of(B
       sb.write(',');
       code.write(sb.toString());
     }
+
+    final event = annotation.event;
+    if (event != null) {
+      code.write('this.onEvent,');
+    }
     code.write('required this.child');
     code.closeIndent();
     code.write('});');
@@ -111,6 +128,8 @@ static $type? maybe${name.substring(0, 1).toUpperCase()}${name.substring(1)}Of(B
   }
 
   static String _buildInheritedModelField(
+    AnnotationInfo annotation,
+    String elementName,
     List<ParameterElement>? constructorParameters,
   ) {
     final code = CodeIndentWriter();
@@ -119,20 +138,11 @@ static $type? maybe${name.substring(0, 1).toUpperCase()}${name.substring(1)}Of(B
         code.write('final ${e.type} ${e.name};');
       }
     }
+    final event = annotation.event;
+    if (event != null) {
+      code.write('final Future<dynamic> Function($elementName model, $event event)? onEvent;');
+    }
     code.write('final Widget child;');
     return code.toString();
-  }
-}
-
-extension _FieldElementUtils on FieldElement {
-  bool isOptional() {
-    final type = '${this.type}';
-
-    if (type.endsWith('?')) {
-      return true;
-    } else if (type == 'dynamic') {
-      return true;
-    }
-    return false;
   }
 }

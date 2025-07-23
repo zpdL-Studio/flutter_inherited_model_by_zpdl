@@ -25,7 +25,7 @@ class InheritedModelBuilder {
     code.closeIndent();
     code.write('}');
 
-    print('InheritedModelWidgetBuilder.builder ->\n${code.toString()}');
+    // print('InheritedModelWidgetBuilder.builder ->\n${code.toString()}');
     return code.toString();
   }
 

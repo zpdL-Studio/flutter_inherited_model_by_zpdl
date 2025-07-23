@@ -17,7 +17,7 @@ class MixinBuilder {
     code.line();
     if (constructorParameters != null && constructorParameters.isNotEmpty) {
       for (final e in constructorParameters) {
-        code.write('${e.type} get ${e.name} => throw UnimplementedError();');
+        code.write('${e.type} get ${e.name} => throw UnimplementedError(\'${e.name} has not been implemented.\');');
       }
     }
     code.line();
@@ -37,6 +37,13 @@ void initState() {}
 void didUpdateWidget($useStateParameter) {}
 
 void dispose() {}
+''');
+    }
+
+    final event = annotation.event;
+    if(event != null) {
+      code.write('''
+Future<dynamic> emitEvent($event event) => throw UnimplementedError('emitEvent($event event) has not been implemented.');
 ''');
     }
 

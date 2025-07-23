@@ -1,10 +1,12 @@
 // ignore_for_file: deprecated_member_use
 import 'package:analyzer/dart/element/element.dart';
+import 'package:flutter_inherited_model_builder/src/annotation_builder.dart';
 
 import 'code_indent_writer.dart';
 
 class ModelBuilder {
   static String build({
+    required AnnotationInfo annotation,
     required String name,
     required String elementName,
     required List<ParameterElement>? constructorParameters,
@@ -51,6 +53,27 @@ class ModelBuilder {
     for(final e in fields) {
       code.write(_buildField(e));
     }
+
+//     code.write('''
+// @override
+// void dispose() {
+//   ${annotation.event != null ? '_\$event.dispose();' : ''}
+//   super.dispose();
+// }
+// ''');
+
+    final event = annotation.event;
+    if (event != null) {
+        code.write('''
+Future<dynamic> Function($event)? _\$event;
+
+@override
+Future<dynamic> emitEvent($event event) async {
+  return await _\$event?.call(event);
+}
+''');
+    }
+
     code.closeIndent();
     code.write('}');
 

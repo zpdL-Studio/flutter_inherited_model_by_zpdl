@@ -19,13 +19,14 @@ class InheritedModelStateBuilder {
     code.write('class $name extends State<$inheritedModelName> {');
     code.openIndent();
     code.write('late final $modelName _model;');
+    code.write('bool _isFrameDraw = false;');
     code.line();
 
     code.write(
       _buildInitState(
+        annotation,
         modelName,
         constructorParameters,
-        annotation.useStateCycle,
       ),
     );
 
@@ -43,9 +44,9 @@ class InheritedModelStateBuilder {
   }
 
   static String _buildInitState(
+    AnnotationInfo annotation,
     String modelName,
     List<ParameterElement>? constructorParameters,
-    bool useStateCycle,
   ) {
     final code = CodeIndentWriter();
     code.write('@override');
@@ -65,7 +66,32 @@ class InheritedModelStateBuilder {
       code.write(');');
     }
 
-    if (useStateCycle) {
+    final event = annotation.event;
+    if(event != null) {
+      code.write('''
+_model._\$event = (e) async {
+  final onEvent = widget.onEvent;
+  if (onEvent != null) {
+      if(!_isFrameDraw) {
+        final completer = Completer<dynamic>();
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          try {
+            completer.complete(await onEvent(_model, e));
+          } catch(e) {
+            completer.completeError(e);
+          }
+        });
+        return completer.future;
+      } else {
+        return await onEvent(_model, e);
+      }
+    }
+    return null;
+  };
+''');
+    }
+
+    if (annotation.useStateCycle) {
       // code.write('_model.onInit(${constructorParameters?.fold(
       //     '', (previousValue, element) =>
       // ('$previousValue${element
@@ -122,6 +148,7 @@ void didUpdateWidget($inheritedModelName oldWidget) {
     return '''
 @override
 void dispose() {
+  _model._\$event = null;
   _model._\$setState = null;
   _model.dispose();
   super.dispose();
@@ -139,7 +166,7 @@ void dispose() {
 @override
 Widget build(BuildContext context) {''');
     code.openIndent();
-
+    code.write('_isFrameDraw = true;');
     code.write('return $inheritedModelWidgetName(');
     code.writeIndent((code) {
       if(constructorParameters != null) {

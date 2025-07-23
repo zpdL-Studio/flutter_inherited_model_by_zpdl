@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_inherited_model/flutter_inherited_model.dart';
 
@@ -7,7 +9,10 @@ void main() {
   runApp(const MyApp());
 }
 
-@FlutterInheritedModel(name: 'MyAppCountInheritedModel')
+@FlutterInheritedModel(
+  name: 'MyAppCountInheritedModel',
+  event: MyAppCountModelEvent,
+)
 class MyAppCountModel with $MyAppCountModel {
   @inheritedModelState
   late int count;
@@ -19,11 +24,26 @@ class MyAppCountModel with $MyAppCountModel {
   @override
   void initState() {
     count = 0;
+    onSnackBar('MyAppCountModel initState');
   }
 
   void onCountToZero() {
     count = 0;
   }
+
+  void onSnackBar(String message) async {
+    debugPrint(
+      'onSnackBar result: ${await emitEvent(MyAppCountModelSnackBarEvent(message))}',
+    );
+  }
+}
+
+sealed class MyAppCountModelEvent {}
+
+class MyAppCountModelSnackBarEvent implements MyAppCountModelEvent {
+  final String message;
+
+  MyAppCountModelSnackBarEvent(this.message);
 }
 
 class MyApp extends StatelessWidget {
@@ -36,9 +56,22 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: MyAppCountInheritedModel(
-        title: 'Flutter Inherited Model Page',
-        child: MyHomePage(),
+      home: Builder(
+        builder: (context) {
+          return MyAppCountInheritedModel(
+            title: 'Flutter Inherited Model Page',
+            onEvent: (MyAppCountModel model, MyAppCountModelEvent event) async {
+              switch (event) {
+                case MyAppCountModelSnackBarEvent():
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(event.message)));
+                  return true;
+              }
+            },
+            child: MyHomePage(),
+          );
+        },
       ),
     );
   }
@@ -70,7 +103,10 @@ class MyHomePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: model.onCountToZero,
+              onPressed: () {
+                model.onCountToZero();
+                model.onSnackBar('Count to zero');
+              },
               child: Text('Count to zero'),
             ),
           ],
