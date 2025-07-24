@@ -103,12 +103,12 @@ _model._\$event = (e) async {
       //     '', (previousValue, element) =>
       // ('$previousValue${element
       //     .name} = widget.${element.name}')) ?? ''});');
-      code.write('_model.initState();');
+      code.write('_model.onInitState();');
     }
     code.write('_model._\$setState = setState;');
     if (annotation.useLifecycleState) {
       code.write(
-        '_lifecycleStateListener = AppLifecycleListener(onStateChange: _model.didChangeAppLifecycleState);',
+        '_lifecycleStateListener = AppLifecycleListener(onStateChange: _model.onDidChangeAppLifecycleState);',
       );
     }
     code.closeIndent();
@@ -142,7 +142,7 @@ void didUpdateWidget($inheritedModelName oldWidget) {
     code.openIndent();
     code.write('if(${compareString.toString()}) {');
     code.writeIndent((code) {
-      code.write('_model.didUpdateWidget(${didUpdateString.toString()});');
+      code.write('_model.onDidUpdateWidget(${didUpdateString.toString()});');
       for (final e in constructorParameters) {
         code.write(
           '_model.${ModelBuilder.getConstructorName(e.name)} = widget.${e.name};',
@@ -162,7 +162,7 @@ void dispose() {
   ${annotation.useLifecycleState ? '_lifecycleStateListener.dispose();' : ''}
   ${annotation.event != null ? '_model._\$event = null;' : ''}
   _model._\$setState = null;
-  ${annotation.useStateCycle ? '_model.dispose();' : ''}
+  ${annotation.useStateCycle ? '_model.onDispose();' : ''}
   super.dispose();
 }
     ''';

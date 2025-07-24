@@ -35,17 +35,17 @@ class MixinBuilder {
       }
 
       code.write('''
-void initState() {}
+void onInitState() {}
 
-void didUpdateWidget($useStateParameter) {}
+void onDidUpdateWidget($useStateParameter) {}
 
-void dispose() {}
+void onDispose() {}
 ''');
     }
 
     if (annotation.useStateCycle) {
       code.write('''
-void didChangeAppLifecycleState(AppLifecycleState state) {}
+void onDidChangeAppLifecycleState(AppLifecycleState state) {}
 ''');
     }
 

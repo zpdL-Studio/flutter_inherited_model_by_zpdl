@@ -21,10 +21,20 @@ class MyAppCountModel with $MyAppCountModel {
   factory MyAppCountModel({required String title}) = _$MyAppCountModel;
 
   @override
-  void initState() {
+  void onInitState() {
     count = 0;
     onSnackBar('MyAppCountModel initState : ');
   }
+
+  // @override
+  // void onDidUpdateWidget(String title) {
+  //   super.onDidUpdateWidget(title);
+  // }
+
+  // @override
+  // void onDispose() {
+  //   super.onDispose();
+  // }
 
   void onCountToZero() {
     count = 0;
@@ -37,7 +47,7 @@ class MyAppCountModel with $MyAppCountModel {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void onDidChangeAppLifecycleState(AppLifecycleState state) {
     debugPrint(
       'didChangeAppLifecycleState state: $state)',
     );

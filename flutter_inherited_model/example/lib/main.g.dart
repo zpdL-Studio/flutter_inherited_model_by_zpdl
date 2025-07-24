@@ -10,13 +10,13 @@ mixin $MyAppCountModel {
   String get title =>
       throw UnimplementedError('title has not been implemented.');
 
-  void initState() {}
+  void onInitState() {}
 
-  void didUpdateWidget(String title) {}
+  void onDidUpdateWidget(String title) {}
 
-  void dispose() {}
+  void onDispose() {}
 
-  void didChangeAppLifecycleState(AppLifecycleState state) {}
+  void onDidChangeAppLifecycleState(AppLifecycleState state) {}
 
   Future<dynamic> emitEvent(MyAppCountModelEvent event) =>
       throw UnimplementedError(
@@ -145,10 +145,10 @@ class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
       return null;
     };
 
-    _model.initState();
+    _model.onInitState();
     _model._$setState = setState;
     _lifecycleStateListener = AppLifecycleListener(
-      onStateChange: _model.didChangeAppLifecycleState,
+      onStateChange: _model.onDidChangeAppLifecycleState,
     );
   }
 
@@ -157,7 +157,7 @@ class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.title != oldWidget.title) {
-      _model.didUpdateWidget(widget.title);
+      _model.onDidUpdateWidget(widget.title);
       _model._$title = widget.title;
     }
   }
@@ -167,7 +167,7 @@ class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
     _lifecycleStateListener.dispose();
     _model._$event = null;
     _model._$setState = null;
-    _model.dispose();
+    _model.onDispose();
     super.dispose();
   }
 
