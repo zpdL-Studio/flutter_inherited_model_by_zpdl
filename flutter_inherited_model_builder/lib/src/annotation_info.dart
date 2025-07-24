@@ -6,6 +6,8 @@ class AnnotationInfo {
   final bool useStateCycle;
   final bool useLifecycleState;
   final bool useAsyncWorker;
+  final bool useSingleTickerProvider;
+  final bool useTickerProvider;
   final DartType? event;
 
   AnnotationInfo({
@@ -13,6 +15,8 @@ class AnnotationInfo {
     required this.useStateCycle,
     required this.useLifecycleState,
     required this.useAsyncWorker,
+    required this.useSingleTickerProvider,
+    required this.useTickerProvider,
     required this.event,
   });
 
@@ -21,19 +25,24 @@ class AnnotationInfo {
     final useStateCycle = annotation.read('useStateCycle');
     final useLifecycleState = annotation.read('useLifecycleState');
     final useAsyncWorker = annotation.read('useAsyncWorker');
+    final useSingleTickerProvider = annotation.read('useSingleTickerProvider');
+    final useTickerProvider = annotation.read('useTickerProvider');
     final event = annotation.read('event');
+
     return AnnotationInfo(
       name: name.isString ? name.stringValue : null,
       useStateCycle: useStateCycle.isBool ? useStateCycle.boolValue : false,
       useLifecycleState:
           useLifecycleState.isBool ? useLifecycleState.boolValue : false,
       useAsyncWorker: useAsyncWorker.isBool ? useAsyncWorker.boolValue : false,
+      useSingleTickerProvider: useSingleTickerProvider.isBool ? useSingleTickerProvider.boolValue : false,
+      useTickerProvider: useTickerProvider.isBool ? useTickerProvider.boolValue : false,
       event: event.isNull ? null : event.typeValue,
     );
   }
 
   @override
   String toString() {
-    return 'AnnotationInfo{name: $name, useStateCycle: $useStateCycle, useLifecycleState: $useLifecycleState, event: $event}';
+    return 'AnnotationInfo{name: $name, useStateCycle: $useStateCycle, useLifecycleState: $useLifecycleState, useAsyncWorker: $useAsyncWorker, useSingleTickerProvider: $useSingleTickerProvider, useTickerProvider: $useTickerProvider, event: $event}';
   }
 }

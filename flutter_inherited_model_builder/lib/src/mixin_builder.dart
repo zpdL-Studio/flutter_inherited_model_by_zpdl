@@ -64,6 +64,11 @@ Future<dynamic> emitEvent($event event) => throw UnimplementedError('emitEvent($
 ''');
     }
 
+    if(annotation.useSingleTickerProvider || annotation.useTickerProvider) {
+      code.write('''
+TickerProvider get tickerProvider => throw UnimplementedError('tickerProvider has not been implemented.');
+''');
+    }
     code.closeIndent();
     code.write('}');
 

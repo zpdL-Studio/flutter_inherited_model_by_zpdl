@@ -11,6 +11,8 @@ void main() {
   name: 'MyAppCountInheritedModel',
   useLifecycleState: true,
   useAsyncWorker: true,
+  useSingleTickerProvider: true,
+  // useTickerProvider: true,
   event: MyAppCountModelEvent,
 )
 class MyAppCountModel with $MyAppCountModel {

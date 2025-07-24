@@ -111,6 +111,14 @@ Future<dynamic> emitEvent($event event) async {
 ''');
     }
 
+    if (annotation.useSingleTickerProvider || annotation.useTickerProvider) {
+      code.write('''
+late final TickerProvider Function() _\$tickerProvider;
+
+@override
+TickerProvider get tickerProvider => _\$tickerProvider();
+''');
+    }
     code.closeIndent();
     code.write('}');
 

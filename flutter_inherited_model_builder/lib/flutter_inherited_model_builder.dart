@@ -32,6 +32,15 @@ class FlutterInheritedModelBuilder
 
     final annotationInfo = AnnotationInfo.from(annotation);
     print('FlutterInheritedModelBuilder -> annotation : $annotationInfo');
+    if (annotationInfo.useSingleTickerProvider &&
+        annotationInfo.useTickerProvider) {
+      throw InvalidGenerationSourceError(
+        'The `useSingleTickerProvider` and `useTickerProvider` annotations cannot be used together',
+        todo:
+            'Please choose only one or remove the unnecessary annotation (`useSingleTickerProvider` or `useTickerProvider`).',
+        element: element,
+      );
+    }
 
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(

@@ -29,6 +29,9 @@ mixin $MyAppCountModel {
       throw UnimplementedError(
         'emitEvent(MyAppCountModelEvent event) has not been implemented.',
       );
+
+  TickerProvider get tickerProvider =>
+      throw UnimplementedError('tickerProvider has not been implemented.');
 }
 
 class MyAppCountInheritedModel extends StatefulWidget {
@@ -150,9 +153,15 @@ class _$MyAppCountModel extends MyAppCountModel {
   Future<dynamic> emitEvent(MyAppCountModelEvent event) async {
     return await _$event?.call(event);
   }
+
+  late final TickerProvider Function() _$tickerProvider;
+
+  @override
+  TickerProvider get tickerProvider => _$tickerProvider();
 }
 
-class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
+class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel>
+    with SingleTickerProviderStateMixin {
   late final _$MyAppCountModel _model;
   late final AppLifecycleListener _lifecycleStateListener;
   bool _isFrameDraw = false;
@@ -180,6 +189,8 @@ class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
       }
       return null;
     };
+
+    _model._$tickerProvider = () => this;
 
     _model.onInitState();
     _model._$setState = setState;

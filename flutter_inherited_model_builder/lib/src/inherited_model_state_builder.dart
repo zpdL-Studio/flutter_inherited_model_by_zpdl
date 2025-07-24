@@ -16,8 +16,14 @@ class InheritedModelStateBuilder {
     required List<FieldElement> fields,
   }) {
     final code = CodeIndentWriter();
+    final mixins = StringBuffer();
+    if(annotation.useTickerProvider) {
+      mixins.write('with TickerProviderStateMixin ');
+    } else if(annotation.useSingleTickerProvider) {
+      mixins.write('with SingleTickerProviderStateMixin ');
+    }
 
-    code.write('class $name extends State<$inheritedModelName> {');
+    code.write('class $name extends State<$inheritedModelName> ${mixins.toString()}{');
     code.openIndent();
     code.write('late final $modelName _model;');
     if (annotation.useLifecycleState) {
@@ -72,7 +78,6 @@ class InheritedModelStateBuilder {
       code.closeIndent();
       code.write(');');
     }
-
     final event = annotation.event;
     if (event != null) {
       code.write('''
@@ -97,7 +102,10 @@ _model._\$event = (e) async {
   };
 ''');
     }
-
+    if(annotation.useSingleTickerProvider || annotation.useTickerProvider) {
+      code.write('_model._\$tickerProvider = () => this;');
+      code.line();
+    }
     if (annotation.useStateCycle) {
       // code.write('_model.onInit(${constructorParameters?.fold(
       //     '', (previousValue, element) =>

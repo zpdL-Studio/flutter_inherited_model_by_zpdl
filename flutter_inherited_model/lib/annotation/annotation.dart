@@ -3,6 +3,8 @@ final class FlutterInheritedModel {
   final bool useStateCycle;
   final bool useLifecycleState;
   final bool useAsyncWorker;
+  final bool useSingleTickerProvider;
+  final bool useTickerProvider;
   final Type? event;
 
   const FlutterInheritedModel({
@@ -10,6 +12,8 @@ final class FlutterInheritedModel {
     this.useStateCycle = true,
     this.useLifecycleState = false,
     this.useAsyncWorker = false,
+    this.useSingleTickerProvider = false,
+    this.useTickerProvider = false,
     this.event,
   });
 }
