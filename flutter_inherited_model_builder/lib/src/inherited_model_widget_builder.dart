@@ -21,7 +21,7 @@ class InheritedModelWidgetBuilder {
     code.openIndent();
     code.write('''
 static $elementName model(BuildContext context) {
-  return context.getInheritedWidgetOfExactType<$inheritedModelWidgetName>()!.model;
+  return maybeModel(context)!;
 }
 
 static $elementName? maybeModel(BuildContext context) {
@@ -74,10 +74,9 @@ static $type ${name}Of(BuildContext context) {
 }
 ''');
       } else {
+        final maybeOf = 'maybe${name.substring(0, 1).toUpperCase()}${name.substring(1)}Of';
         code.write('''
-static $type ${name}Of(BuildContext context) {
-  return InheritedModel.inheritFrom<$inheritedModelWidgetName>(context, aspect: $i)!.$name;
-}
+static $type ${name}Of(BuildContext context) => $maybeOf(context)!;
 
 static $type? maybe${name.substring(0, 1).toUpperCase()}${name.substring(1)}Of(BuildContext context) {
   return InheritedModel.inheritFrom<$inheritedModelWidgetName>(context, aspect: $i)?.$name;

@@ -26,9 +26,7 @@ mixin $MyAppCountModel {
 
 class MyAppCountInheritedModel extends StatefulWidget {
   static MyAppCountModel model(BuildContext context) {
-    return context
-        .getInheritedWidgetOfExactType<_MyAppCountInheritedModel>()!
-        .model;
+    return maybeModel(context)!;
   }
 
   static MyAppCountModel? maybeModel(BuildContext context) {
@@ -37,12 +35,7 @@ class MyAppCountInheritedModel extends StatefulWidget {
         ?.model;
   }
 
-  static String titleOf(BuildContext context) {
-    return InheritedModel.inheritFrom<_MyAppCountInheritedModel>(
-      context,
-      aspect: 0,
-    )!.title;
-  }
+  static String titleOf(BuildContext context) => maybeTitleOf(context)!;
 
   static String? maybeTitleOf(BuildContext context) {
     return InheritedModel.inheritFrom<_MyAppCountInheritedModel>(
@@ -51,12 +44,7 @@ class MyAppCountInheritedModel extends StatefulWidget {
     )?.title;
   }
 
-  static int countOf(BuildContext context) {
-    return InheritedModel.inheritFrom<_MyAppCountInheritedModel>(
-      context,
-      aspect: 1,
-    )!.count;
-  }
+  static int countOf(BuildContext context) => maybeCountOf(context)!;
 
   static int? maybeCountOf(BuildContext context) {
     return InheritedModel.inheritFrom<_MyAppCountInheritedModel>(
@@ -219,7 +207,7 @@ mixin $EmptyModel {}
 
 class EmptyInheritedModel extends StatefulWidget {
   static EmptyModel model(BuildContext context) {
-    return context.getInheritedWidgetOfExactType<_EmptyInheritedModel>()!.model;
+    return maybeModel(context)!;
   }
 
   static EmptyModel? maybeModel(BuildContext context) {
