@@ -29,6 +29,15 @@ static $elementName? maybeModel(BuildContext context) {
 }
 ''');
     code.line();
+    int dependencyIndex = (constructorParameters?.length ?? 0) + fields.length;
+    if(annotation.useAsyncWorker) {
+      code.write('''
+static bool asyncWorkingOf(BuildContext context) {
+  return InheritedModel.inheritFrom<$inheritedModelWidgetName>(context, aspect: ${dependencyIndex++})?.asyncWorking ?? false;
+}
+''');
+    }
+
     code.write(
       _buildInheritedModelOf(
         inheritedModelWidgetName,

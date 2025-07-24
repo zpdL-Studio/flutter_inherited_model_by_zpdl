@@ -49,6 +49,14 @@ void onDidChangeAppLifecycleState(AppLifecycleState state) {}
 ''');
     }
 
+    if (annotation.useAsyncWorker) {
+      code.write('''
+void Function(Object e, StackTrace stackTrace)? asyncWorkerDefaultError;
+
+void asyncWorker(Future<void> Function() worker, [void Function(Object e, StackTrace stackTrace)? error]) => throw UnimplementedError('asyncWorker has not been implemented.');
+''');
+    }
+
     final event = annotation.event;
     if (event != null) {
       code.write('''

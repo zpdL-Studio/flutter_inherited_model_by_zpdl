@@ -10,6 +10,7 @@ void main() {
 @FlutterInheritedModel(
   name: 'MyAppCountInheritedModel',
   useLifecycleState: true,
+  useAsyncWorker: true,
   event: MyAppCountModelEvent,
 )
 class MyAppCountModel with $MyAppCountModel {
@@ -24,6 +25,7 @@ class MyAppCountModel with $MyAppCountModel {
   void onInitState() {
     count = 0;
     onSnackBar('MyAppCountModel initState : ');
+    asyncWorker(() async {});
   }
 
   // @override

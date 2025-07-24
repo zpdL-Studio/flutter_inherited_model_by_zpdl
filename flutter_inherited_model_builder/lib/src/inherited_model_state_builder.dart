@@ -192,6 +192,9 @@ Widget build(BuildContext context) {''');
       for (final e in fields) {
         code.write('${e.name}: _model.${e.name},');
       }
+      if(annotation.useAsyncWorker) {
+        code.write('asyncWorking: _model._asyncWorking,');
+      }
       code.write('model: _model,');
       code.write('child: widget.child');
     });

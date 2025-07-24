@@ -18,6 +18,13 @@ mixin $MyAppCountModel {
 
   void onDidChangeAppLifecycleState(AppLifecycleState state) {}
 
+  void Function(Object e, StackTrace stackTrace)? asyncWorkerDefaultError;
+
+  void asyncWorker(
+    Future<void> Function() worker, [
+    void Function(Object e, StackTrace stackTrace)? error,
+  ]) => throw UnimplementedError('asyncWorker has not been implemented.');
+
   Future<dynamic> emitEvent(MyAppCountModelEvent event) =>
       throw UnimplementedError(
         'emitEvent(MyAppCountModelEvent event) has not been implemented.',
@@ -33,6 +40,14 @@ class MyAppCountInheritedModel extends StatefulWidget {
     return context
         .getInheritedWidgetOfExactType<_MyAppCountInheritedModel>()
         ?.model;
+  }
+
+  static bool asyncWorkingOf(BuildContext context) {
+    return InheritedModel.inheritFrom<_MyAppCountInheritedModel>(
+          context,
+          aspect: 2,
+        )?.asyncWorking ??
+        false;
   }
 
   static String titleOf(BuildContext context) => maybeTitleOf(context)!;
@@ -74,8 +89,17 @@ class MyAppCountInheritedModel extends StatefulWidget {
 }
 
 class _$MyAppCountModel extends MyAppCountModel {
-  // ignore: unused_field
   StateSetter? _$setState;
+
+  // ignore: unused_element
+  void _setState(VoidCallback fn) {
+    final setState = _$setState;
+    if (setState == null) {
+      fn();
+      return;
+    }
+    setState(fn);
+  }
 
   String _$title;
 
@@ -86,14 +110,38 @@ class _$MyAppCountModel extends MyAppCountModel {
 
   @override
   set count(int value) {
-    final setState = _$setState;
-    if (setState == null) {
-      super.count = value;
-      return;
+    _setState(() => super.count = value);
+  }
+
+  int _$asyncWorkingCount = 0;
+
+  bool get _asyncWorking => _$asyncWorkingCount > 0;
+
+  @override
+  void asyncWorker(
+    Future<void> Function() worker, [
+    void Function(Object e, StackTrace stackTrace)? error,
+  ]) async {
+    final asyncWorking = _asyncWorking;
+    _$asyncWorkingCount++;
+    if (_asyncWorking != asyncWorking) {
+      try {
+        _setState(() {});
+      } catch (_) {}
     }
-    setState(() {
-      super.count = value;
-    });
+    try {
+      await worker();
+    } catch (e, stackTrace) {
+      (error ?? asyncWorkerDefaultError)?.call(e, stackTrace);
+    } finally {
+      final asyncWorking = _asyncWorking;
+      _$asyncWorkingCount--;
+      if (_asyncWorking != asyncWorking) {
+        try {
+          _setState(() {});
+        } catch (_) {}
+      }
+    }
   }
 
   Future<dynamic> Function(MyAppCountModelEvent)? _$event;
@@ -165,6 +213,7 @@ class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
     return _MyAppCountInheritedModel(
       title: _model.title,
       count: _model.count,
+      asyncWorking: _model._asyncWorking,
       model: _model,
       child: widget.child,
     );
@@ -174,18 +223,22 @@ class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
 class _MyAppCountInheritedModel extends InheritedModel<int> {
   final String title;
   final int count;
+  final bool asyncWorking;
   final _$MyAppCountModel model;
 
   const _MyAppCountInheritedModel({
     required this.title,
     required this.count,
+    required this.asyncWorking,
     required this.model,
     required super.child,
   });
 
   @override
   bool updateShouldNotify(_MyAppCountInheritedModel oldWidget) {
-    return title != oldWidget.title || count != oldWidget.count;
+    return title != oldWidget.title ||
+        count != oldWidget.count ||
+        asyncWorking != oldWidget.asyncWorking;
   }
 
   @override
@@ -197,6 +250,9 @@ class _MyAppCountInheritedModel extends InheritedModel<int> {
       return true;
     }
     if (dependencies.contains(1) && count != oldWidget.count) {
+      return true;
+    }
+    if (dependencies.contains(2) && asyncWorking != oldWidget.asyncWorking) {
       return true;
     }
     return false;
@@ -223,8 +279,17 @@ class EmptyInheritedModel extends StatefulWidget {
 }
 
 class _$EmptyModel extends EmptyModel {
-  // ignore: unused_field
   StateSetter? _$setState;
+
+  // ignore: unused_element
+  void _setState(VoidCallback fn) {
+    final setState = _$setState;
+    if (setState == null) {
+      fn();
+      return;
+    }
+    setState(fn);
+  }
 
   _$EmptyModel() : super._();
 }

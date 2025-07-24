@@ -1,10 +1,12 @@
 // ignore_for_file: deprecated_member_use
 import 'package:analyzer/dart/element/element.dart';
+import 'package:flutter_inherited_model_builder/src/annotation_info.dart';
 
 import 'code_indent_writer.dart';
 
 class InheritedModelBuilder {
   static String build({
+    required AnnotationInfo annotation,
     required String name,
     required String modelName,
     required List<ParameterElement>? constructorParameters,
@@ -14,13 +16,13 @@ class InheritedModelBuilder {
     final code = CodeIndentWriter();
     code.write('class $name extends InheritedModel<int> {');
     code.openIndent();
-    code.write(_buildField(modelName, constructor, fields));
+    code.write(_buildField(annotation, modelName, constructor, fields));
     code.line();
-    code.write(_buildConstruct(name, constructor, fields));
+    code.write(_buildConstruct(annotation, name, constructor, fields));
     code.line();
-    code.write(_buildUpdateShouldNotify(name, constructor, fields));
+    code.write(_buildUpdateShouldNotify(annotation, name, constructor, fields));
     code.line();
-    code.write(_buildUpdateShouldNotifyDependent(name, constructor, fields));
+    code.write(_buildUpdateShouldNotifyDependent(annotation, name, constructor, fields));
     code.line();
     code.closeIndent();
     code.write('}');
@@ -30,6 +32,7 @@ class InheritedModelBuilder {
   }
 
   static String _buildField(
+      AnnotationInfo annotation,
       String modelName,
       List<ParameterElement> constructorParameters,
       List<FieldElement> fields,
@@ -41,11 +44,15 @@ class InheritedModelBuilder {
     for (final e in fields) {
       code.write('final ${e.type} ${e.name};');
     }
+    if(annotation.useAsyncWorker) {
+      code.write('final bool asyncWorking;');
+    }
     code.write('final $modelName model;');
     return code.toString();
   }
 
   static String _buildConstruct(
+      AnnotationInfo annotation,
       String name,
       List<ParameterElement> constructorParameters,
       List<FieldElement> fields,
@@ -59,6 +66,9 @@ class InheritedModelBuilder {
       for (final e in fields) {
         code.write('required this.${e.name},');
       }
+      if(annotation.useAsyncWorker) {
+        code.write('required this.asyncWorking,');
+      }
       code.write('required this.model,');
       code.write('required super.child');
     });
@@ -67,6 +77,7 @@ class InheritedModelBuilder {
   }
 
   static String _buildUpdateShouldNotify(
+    AnnotationInfo annotation,
     String name,
     List<ParameterElement> constructorParameters,
     List<FieldElement> fields,
@@ -91,6 +102,12 @@ class InheritedModelBuilder {
         }
         sb.write('${e.name} != oldWidget.${e.name}');
       }
+      if (annotation.useAsyncWorker) {
+        if (sb.isNotEmpty) {
+          sb.write(' || ');
+        }
+        sb.write('asyncWorking != oldWidget.asyncWorking');
+      }
       code.write('return ${sb.toString()};');
     }
     code.closeIndent();
@@ -99,6 +116,7 @@ class InheritedModelBuilder {
   }
 
   static String _buildUpdateShouldNotifyDependent(
+      AnnotationInfo annotation,
       String name,
       List<ParameterElement> constructorParameters,
       List<FieldElement> fields,
@@ -118,9 +136,16 @@ class InheritedModelBuilder {
         code.write('''
 if (dependencies.contains($i) && $e != oldWidget.$e) {
   return true;
-}'''
-        );
+}''');
       }
+    }
+
+    int dependencyIndex = constructorParameters.length + fields.length;
+    if (annotation.useAsyncWorker) {
+      code.write('''
+if (dependencies.contains(${dependencyIndex++}) && asyncWorking != oldWidget.asyncWorking) {
+  return true;
+}''');
     }
     code.write('return false;');
     code.closeIndent();

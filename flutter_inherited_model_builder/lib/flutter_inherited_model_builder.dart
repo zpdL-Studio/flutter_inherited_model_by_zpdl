@@ -160,6 +160,7 @@ class FlutterInheritedModelBuilder
 
     code.write(
       InheritedModelBuilder.build(
+        annotation: annotationInfo,
         name: inheritedModelWidgetName,
         modelName: modelName,
         constructorParameters: factoryConstructorParameters,

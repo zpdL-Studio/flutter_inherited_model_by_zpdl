@@ -18,8 +18,18 @@ class ModelBuilder {
     code.write('class $name extends $elementName${mixins.toString()} {');
     code.openIndent();
     code.line();
-    code.write('// ignore: unused_field');
-    code.write('StateSetter? _\$setState;');
+    code.write('''
+StateSetter? _\$setState;
+
+// ignore: unused_element
+void _setState(VoidCallback fn) {
+  final setState = _\$setState;
+  if (setState == null) {
+    fn();
+    return;
+  }
+  setState(fn);
+}''');
     code.line();
     if (constructorParameters == null || constructorParameters.isEmpty) {
       code.write('$name(): super._();');
@@ -57,13 +67,37 @@ class ModelBuilder {
       code.write(_buildField(e));
     }
 
-//     code.write('''
-// @override
-// void dispose() {
-//   ${annotation.event != null ? '_\$event.dispose();' : ''}
-//   super.dispose();
-// }
-// ''');
+    if(annotation.useAsyncWorker) {
+      code.write('''
+int _\$asyncWorkingCount = 0;
+
+bool get _asyncWorking => _\$asyncWorkingCount > 0;
+
+@override
+void asyncWorker(Future<void> Function() worker, [void Function(Object e, StackTrace stackTrace)? error]) async {
+  final asyncWorking = _asyncWorking;
+  _\$asyncWorkingCount++;
+  if (_asyncWorking != asyncWorking) {
+    try {
+      _setState(() {});
+    } catch (_) {}
+  }
+  try {
+    await worker();
+  } catch (e, stackTrace) {
+    (error ?? asyncWorkerDefaultError)?.call(e, stackTrace);
+  } finally {
+    final asyncWorking = _asyncWorking;
+    _\$asyncWorkingCount--;
+    if (_asyncWorking != asyncWorking) {
+      try {
+        _setState(() {});
+      } catch (_) {}
+    }
+  }  
+}
+''');
+    }
 
     final event = annotation.event;
     if (event != null) {
@@ -88,14 +122,7 @@ Future<dynamic> emitEvent($event event) async {
     return '''
 @override
 set ${field.name}(${field.type} value) {
-  final setState = _\$setState;
-  if (setState == null) {
-    super.${field.name} = value;
-    return;
-  }
-  setState(() {
-    super.${field.name} = value;
-  });
+  _setState(() => super.${field.name} = value);
 }
     ''';
   }

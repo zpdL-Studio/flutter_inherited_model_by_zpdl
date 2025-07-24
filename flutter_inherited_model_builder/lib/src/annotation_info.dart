@@ -5,12 +5,14 @@ class AnnotationInfo {
   final String? name;
   final bool useStateCycle;
   final bool useLifecycleState;
+  final bool useAsyncWorker;
   final DartType? event;
 
   AnnotationInfo({
     required this.name,
     required this.useStateCycle,
     required this.useLifecycleState,
+    required this.useAsyncWorker,
     required this.event,
   });
 
@@ -18,15 +20,18 @@ class AnnotationInfo {
     final name = annotation.read('name');
     final useStateCycle = annotation.read('useStateCycle');
     final useLifecycleState = annotation.read('useLifecycleState');
+    final useAsyncWorker = annotation.read('useAsyncWorker');
     final event = annotation.read('event');
     return AnnotationInfo(
       name: name.isString ? name.stringValue : null,
       useStateCycle: useStateCycle.isBool ? useStateCycle.boolValue : false,
       useLifecycleState:
           useLifecycleState.isBool ? useLifecycleState.boolValue : false,
+      useAsyncWorker: useAsyncWorker.isBool ? useAsyncWorker.boolValue : false,
       event: event.isNull ? null : event.typeValue,
     );
   }
+
   @override
   String toString() {
     return 'AnnotationInfo{name: $name, useStateCycle: $useStateCycle, useLifecycleState: $useLifecycleState, event: $event}';
