@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:flutter_inherited_model/annotation/annotation.dart';
-import 'package:flutter_inherited_model_builder/src/annotation_builder.dart';
+import 'package:flutter_inherited_model_builder/src/annotation_info.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
 import 'package:flutter_inherited_model_builder/src/inherited_model_builder.dart';
 import 'package:flutter_inherited_model_builder/src/inherited_model_state_builder.dart';
@@ -30,7 +30,7 @@ class FlutterInheritedModelBuilder
   ) async {
     print('FlutterInheritedModelBuilder -> element : ${element.name}');
 
-    final annotationInfo = AnnotationBuilder.getAnnotationInfo(annotation);
+    final annotationInfo = AnnotationInfo.from(annotation);
     print('FlutterInheritedModelBuilder -> annotation : $annotationInfo');
 
     if (element is! ClassElement) {

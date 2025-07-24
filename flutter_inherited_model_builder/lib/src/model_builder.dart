@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:analyzer/dart/element/element.dart';
-import 'package:flutter_inherited_model_builder/src/annotation_builder.dart';
 
+import 'annotation_info.dart';
 import 'code_indent_writer.dart';
 
 class ModelBuilder {
@@ -13,7 +13,9 @@ class ModelBuilder {
     required List<FieldElement> fields,
   }) {
     final code = CodeIndentWriter();
-    code.write('class $name extends $elementName {');
+    final mixins = StringBuffer();
+
+    code.write('class $name extends $elementName${mixins.toString()} {');
     code.openIndent();
     code.line();
     code.write('// ignore: unused_field');

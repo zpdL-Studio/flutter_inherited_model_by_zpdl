@@ -16,6 +16,8 @@ mixin $MyAppCountModel {
 
   void dispose() {}
 
+  void didChangeAppLifecycleState(AppLifecycleState state) {}
+
   Future<dynamic> emitEvent(MyAppCountModelEvent event) =>
       throw UnimplementedError(
         'emitEvent(MyAppCountModelEvent event) has not been implemented.',
@@ -116,6 +118,7 @@ class _$MyAppCountModel extends MyAppCountModel {
 
 class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
   late final _$MyAppCountModel _model;
+  late final AppLifecycleListener _lifecycleStateListener;
   bool _isFrameDraw = false;
 
   @override
@@ -144,6 +147,9 @@ class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
 
     _model.initState();
     _model._$setState = setState;
+    _lifecycleStateListener = AppLifecycleListener(
+      onStateChange: _model.didChangeAppLifecycleState,
+    );
   }
 
   @override
@@ -158,6 +164,7 @@ class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
 
   @override
   void dispose() {
+    _lifecycleStateListener.dispose();
     _model._$event = null;
     _model._$setState = null;
     _model.dispose();

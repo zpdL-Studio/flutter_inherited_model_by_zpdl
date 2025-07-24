@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:analyzer/dart/element/element.dart';
 
-import 'annotation_builder.dart';
+import 'annotation_info.dart';
 import 'code_indent_writer.dart';
 
 class MixinBuilder {
@@ -17,7 +17,9 @@ class MixinBuilder {
     code.line();
     if (constructorParameters != null && constructorParameters.isNotEmpty) {
       for (final e in constructorParameters) {
-        code.write('${e.type} get ${e.name} => throw UnimplementedError(\'${e.name} has not been implemented.\');');
+        code.write(
+          '${e.type} get ${e.name} => throw UnimplementedError(\'${e.name} has not been implemented.\');',
+        );
       }
     }
     code.line();
@@ -25,12 +27,13 @@ class MixinBuilder {
       final useStateParameter = StringBuffer();
       if (constructorParameters != null && constructorParameters.isNotEmpty) {
         for (final e in constructorParameters) {
-          if(useStateParameter.isNotEmpty) {
+          if (useStateParameter.isNotEmpty) {
             useStateParameter.write(', ');
           }
           useStateParameter.write('${e.type} ${e.name}');
         }
       }
+
       code.write('''
 void initState() {}
 
@@ -40,8 +43,14 @@ void dispose() {}
 ''');
     }
 
+    if (annotation.useStateCycle) {
+      code.write('''
+void didChangeAppLifecycleState(AppLifecycleState state) {}
+''');
+    }
+
     final event = annotation.event;
-    if(event != null) {
+    if (event != null) {
       code.write('''
 Future<dynamic> emitEvent($event event) => throw UnimplementedError('emitEvent($event event) has not been implemented.');
 ''');

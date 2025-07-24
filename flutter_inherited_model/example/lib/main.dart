@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_inherited_model/flutter_inherited_model.dart';
 
@@ -11,6 +9,7 @@ void main() {
 
 @FlutterInheritedModel(
   name: 'MyAppCountInheritedModel',
+  useLifecycleState: true,
   event: MyAppCountModelEvent,
 )
 class MyAppCountModel with $MyAppCountModel {
@@ -24,7 +23,7 @@ class MyAppCountModel with $MyAppCountModel {
   @override
   void initState() {
     count = 0;
-    onSnackBar('MyAppCountModel initState');
+    onSnackBar('MyAppCountModel initState : ');
   }
 
   void onCountToZero() {
@@ -34,6 +33,13 @@ class MyAppCountModel with $MyAppCountModel {
   void onSnackBar(String message) async {
     debugPrint(
       'onSnackBar result: ${await emitEvent(MyAppCountModelSnackBarEvent(message))}',
+    );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    debugPrint(
+      'didChangeAppLifecycleState state: $state)',
     );
   }
 }

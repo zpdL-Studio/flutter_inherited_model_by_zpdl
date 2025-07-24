@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:analyzer/dart/element/element.dart';
-import 'package:flutter_inherited_model_builder/src/annotation_builder.dart';
 
+import 'annotation_info.dart';
 import 'code_indent_writer.dart';
 import 'model_builder.dart';
 
@@ -16,9 +16,13 @@ class InheritedModelStateBuilder {
     required List<FieldElement> fields,
   }) {
     final code = CodeIndentWriter();
+
     code.write('class $name extends State<$inheritedModelName> {');
     code.openIndent();
     code.write('late final $modelName _model;');
+    if (annotation.useLifecycleState) {
+      code.write('late final AppLifecycleListener _lifecycleStateListener; ');
+    }
     if (annotation.event != null) {
       code.write('bool _isFrameDraw = false;');
     }
@@ -102,7 +106,11 @@ _model._\$event = (e) async {
       code.write('_model.initState();');
     }
     code.write('_model._\$setState = setState;');
-
+    if (annotation.useLifecycleState) {
+      code.write(
+        '_lifecycleStateListener = AppLifecycleListener(onStateChange: _model.didChangeAppLifecycleState);',
+      );
+    }
     code.closeIndent();
     code.write('}');
     return code.toString();
@@ -151,6 +159,7 @@ void didUpdateWidget($inheritedModelName oldWidget) {
     return '''
 @override
 void dispose() {
+  ${annotation.useLifecycleState ? '_lifecycleStateListener.dispose();' : ''}
   ${annotation.event != null ? '_model._\$event = null;' : ''}
   _model._\$setState = null;
   ${annotation.useStateCycle ? '_model.dispose();' : ''}
