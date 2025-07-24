@@ -43,7 +43,7 @@ void onDispose() {}
 ''');
     }
 
-    if (annotation.useStateCycle) {
+    if (annotation.useLifecycleState) {
       code.write('''
 void onDidChangeAppLifecycleState(AppLifecycleState state) {}
 ''');
