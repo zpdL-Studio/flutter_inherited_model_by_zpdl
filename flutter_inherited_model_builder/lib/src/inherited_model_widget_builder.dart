@@ -103,6 +103,10 @@ static $type? maybe${name.substring(0, 1).toUpperCase()}${name.substring(1)}Of(B
     List<ParameterElement>? constructorParameters,
   ) {
     if (constructorParameters == null || constructorParameters.isEmpty) {
+      final event = annotation.event;
+      if (event != null) {
+        return 'const $name({super.key, this.onEvent, required this.child});';
+      }
       return 'const $name({super.key, required this.child});';
     }
     final code = CodeIndentWriter();
