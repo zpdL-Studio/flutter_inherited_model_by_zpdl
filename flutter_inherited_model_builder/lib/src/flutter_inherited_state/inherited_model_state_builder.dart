@@ -2,7 +2,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
 import 'package:flutter_inherited_model_builder/src/flutter_inherited_state/annotation_info.dart';
-import 'package:flutter_inherited_model_builder/src/flutter_inherited_state/model_builder.dart';
 
 class InheritedModelStateBuilder {
   static String build({
@@ -66,46 +65,6 @@ void _updateValue() {
     code.closeIndent();
     code.write('}');
     // print('InheritedModelStateBuilder.builder ->\n${code.toString()}');
-    return code.toString();
-  }
-
-
-  static String _buildDidUpdateWidget(
-    String inheritedModelName,
-    List<ParameterElement> constructorParameters,
-  ) {
-    final compareString = StringBuffer();
-    final didUpdateString = StringBuffer();
-    for (final e in constructorParameters) {
-      if (compareString.isNotEmpty) {
-        compareString.write(' || ');
-      }
-      compareString.write('widget.${e.name} != oldWidget.${e.name}');
-      if (didUpdateString.isNotEmpty) {
-        didUpdateString.write(', ');
-      }
-      didUpdateString.write('widget.${e.name}');
-    }
-
-    final code = CodeIndentWriter();
-    code.write('''
-@override
-void didUpdateWidget($inheritedModelName oldWidget) {
-  super.didUpdateWidget(oldWidget);
-''');
-    code.openIndent();
-    code.write('if(${compareString.toString()}) {');
-    code.writeIndent((code) {
-      code.write('_model.onDidUpdateWidget(${didUpdateString.toString()});');
-      for (final e in constructorParameters) {
-        code.write(
-          '_model.${ModelBuilder.getConstructorName(e.name)} = widget.${e.name};',
-        );
-      }
-    });
-    code.write('}');
-    code.closeIndent();
-    code.write('}');
     return code.toString();
   }
 

@@ -6,3 +6,7 @@
 * useAsyncWorker
 * useSingleTickerProvider
 * useTickerProvider
+
+## 0.9.1
+
+* add FlutterInheritedState

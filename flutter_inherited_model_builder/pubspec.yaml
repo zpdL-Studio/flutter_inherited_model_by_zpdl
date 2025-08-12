@@ -1,6 +1,6 @@
 name: flutter_inherited_model_builder
 description: "Flutter inherited model builder"
-version: 0.9.0
+version: 0.9.1
 homepage: https://github.com/zpdL-Studio/flutter_inherited_model_by_zpdl/tree/main/flutter_inherited_model_builder
 
 environment:
@@ -8,10 +8,8 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-#  flutter_inherited_model: ^0.9.0
-  flutter_inherited_model:
-    path: ../flutter_inherited_model
-    
+  flutter_inherited_model: ^0.9.1
+
   analyzer: ^7.0.0
   build: ^2.0.0
   source_gen: ^2.0.0
