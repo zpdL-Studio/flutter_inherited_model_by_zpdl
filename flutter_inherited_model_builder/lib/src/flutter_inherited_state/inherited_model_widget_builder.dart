@@ -2,7 +2,7 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
-import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/annotation_info.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_state/annotation_info.dart';
 import 'package:flutter_inherited_model_builder/src/builder_util.dart';
 
 class InheritedModelWidgetBuilder {
@@ -10,6 +10,7 @@ class InheritedModelWidgetBuilder {
     required AnnotationInfo annotation,
     required String name,
     required String elementName,
+    required String modelName,
     required String inheritedModelWidgetName,
     required String inheritedModelStateName,
     required List<ParameterElement> constructorParameters,
@@ -46,11 +47,11 @@ static bool asyncWorkingOf(BuildContext context) {
     );
     code.line();
     code.write(
-      _buildInheritedModelConstructor(name, annotation, constructorParameters),
+      _buildInheritedModelConstructor(name, modelName),
     );
     code.line();
     code.write(
-      _buildInheritedModelField(annotation, elementName, constructorParameters),
+      _buildInheritedModelField(elementName),
     );
     code.line();
     code.write('''
@@ -99,66 +100,20 @@ static $type? maybe${name.substring(0, 1).toUpperCase()}${name.substring(1)}Of(B
     return code.toString();
   }
 
-  static String _buildInheritedModelConstructor(
-    String name,
-    AnnotationInfo annotation,
-    List<ParameterElement> constructorParameters,
-  ) {
-    if (constructorParameters.isEmpty) {
-      final event = annotation.event;
-      if (event != null) {
-        return 'const $name({super.key, this.onEvent, required this.child});';
-      }
-      return 'const $name({super.key, required this.child});';
-    }
-    final code = CodeIndentWriter();
-    code.write('const $name({');
-    code.openIndent();
-    code.write('super.key,');
-    for (final e in constructorParameters) {
-      final sb = StringBuffer();
-      final name = e.name;
-      if (e.isRequiredNamed) {
-        sb.write('required this.$name');
-      } else if (e.isOptionalNamed) {
-        sb.write('this.$name');
-      }
-
-      if (e.hasDefaultValue) {
-        sb.write(' = ${e.defaultValueCode}');
-      }
-      sb.write(',');
-      code.write(sb.toString());
-    }
-
-    final event = annotation.event;
-    if (event != null) {
-      code.write('this.onEvent,');
-    }
-    code.write('required this.child');
-    code.closeIndent();
-    code.write('});');
-    return code.toString();
+  static String _buildInheritedModelConstructor(String name, String modelName) {
+    return '''
+const $name({
+  super.key,
+  required this.value,
+  required this.child,
+}): assert(value is $modelName);
+''';
   }
 
-  static String _buildInheritedModelField(
-    AnnotationInfo annotation,
-    String elementName,
-    List<ParameterElement> constructorParameters,
-  ) {
-    final code = CodeIndentWriter();
-    if (constructorParameters.isNotEmpty) {
-      for (final e in constructorParameters) {
-        code.write('final ${e.type} ${e.name};');
-      }
-    }
-    final event = annotation.event;
-    if (event != null) {
-      code.write(
-        'final Future<dynamic> Function($elementName model, $event event)? onEvent;',
-      );
-    }
-    code.write('final Widget child;');
-    return code.toString();
+  static String _buildInheritedModelField(String elementName) {
+    return '''
+final $elementName value;
+final Widget child;
+''';
   }
 }

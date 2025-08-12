@@ -11,7 +11,7 @@ class InheritedModelStateBuilder {
     required String inheritedModelName,
     required String modelName,
     required String inheritedModelWidgetName,
-    required List<ParameterElement>? constructorParameters,
+    required List<ParameterElement> constructorParameters,
     required List<FieldElement> fields,
   }) {
     final code = CodeIndentWriter();
@@ -35,7 +35,7 @@ class InheritedModelStateBuilder {
 
     code.write(_buildInitState(annotation, modelName, constructorParameters));
 
-    if (constructorParameters != null && constructorParameters.isNotEmpty) {
+    if (constructorParameters.isNotEmpty) {
       code.write(
         _buildDidUpdateWidget(inheritedModelName, constructorParameters),
       );
@@ -58,7 +58,7 @@ class InheritedModelStateBuilder {
   static String _buildInitState(
     AnnotationInfo annotation,
     String modelName,
-    List<ParameterElement>? constructorParameters,
+    List<ParameterElement> constructorParameters,
   ) {
     final code = CodeIndentWriter();
     code.write('@override');
@@ -66,7 +66,7 @@ class InheritedModelStateBuilder {
     code.openIndent();
 
     code.write('super.initState();');
-    if (constructorParameters == null || constructorParameters.isEmpty) {
+    if (constructorParameters.isEmpty) {
       code.write('_model = $modelName();');
     } else {
       code.write('_model = $modelName(');
@@ -105,13 +105,7 @@ _model._\$event = (e) async {
       code.write('_model._\$tickerProvider = () => this;');
       code.line();
     }
-    if (annotation.useStateCycle) {
-      // code.write('_model.onInit(${constructorParameters?.fold(
-      //     '', (previousValue, element) =>
-      // ('$previousValue${element
-      //     .name} = widget.${element.name}')) ?? ''});');
-      code.write('_model.onInitState();');
-    }
+    code.write('_model.onInitState();');
     code.write('_model._\$setState = setState;');
     if (annotation.useLifecycleState) {
       code.write(
@@ -169,7 +163,7 @@ void dispose() {
   ${annotation.useLifecycleState ? '_lifecycleStateListener.dispose();' : ''}
   ${annotation.event != null ? '_model._\$event = null;' : ''}
   _model._\$setState = null;
-  ${annotation.useStateCycle ? '_model.onDispose();' : ''}
+  _model.onDispose();
   super.dispose();
 }
     ''';
@@ -178,7 +172,7 @@ void dispose() {
   static String _build(
     AnnotationInfo annotation,
     String inheritedModelWidgetName,
-    List<ParameterElement>? constructorParameters,
+    List<ParameterElement> constructorParameters,
     List<FieldElement> fields,
   ) {
     final code = CodeIndentWriter();
@@ -191,10 +185,8 @@ Widget build(BuildContext context) {''');
     }
     code.write('return $inheritedModelWidgetName(');
     code.writeIndent((code) {
-      if (constructorParameters != null) {
-        for (final e in constructorParameters) {
-          code.write('${e.name}: _model.${e.name},');
-        }
+      for (final e in constructorParameters) {
+        code.write('${e.name}: _model.${e.name},');
       }
       for (final e in fields) {
         code.write('${e.name}: _model.${e.name},');

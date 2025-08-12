@@ -3,7 +3,6 @@ import 'package:source_gen/source_gen.dart';
 
 class AnnotationInfo {
   final String? name;
-  final bool useStateCycle;
   final bool useLifecycleState;
   final bool useAsyncWorker;
   final bool useSingleTickerProvider;
@@ -12,7 +11,6 @@ class AnnotationInfo {
 
   AnnotationInfo({
     required this.name,
-    required this.useStateCycle,
     required this.useLifecycleState,
     required this.useAsyncWorker,
     required this.useSingleTickerProvider,
@@ -22,7 +20,6 @@ class AnnotationInfo {
 
   factory AnnotationInfo.from(ConstantReader annotation) {
     final name = annotation.read('name');
-    final useStateCycle = annotation.read('useStateCycle');
     final useLifecycleState = annotation.read('useLifecycleState');
     final useAsyncWorker = annotation.read('useAsyncWorker');
     final useSingleTickerProvider = annotation.read('useSingleTickerProvider');
@@ -31,7 +28,6 @@ class AnnotationInfo {
 
     return AnnotationInfo(
       name: name.isString ? name.stringValue : null,
-      useStateCycle: useStateCycle.isBool ? useStateCycle.boolValue : false,
       useLifecycleState:
           useLifecycleState.isBool ? useLifecycleState.boolValue : false,
       useAsyncWorker: useAsyncWorker.isBool ? useAsyncWorker.boolValue : false,
@@ -43,6 +39,6 @@ class AnnotationInfo {
 
   @override
   String toString() {
-    return 'AnnotationInfo{name: $name, useStateCycle: $useStateCycle, useLifecycleState: $useLifecycleState, useAsyncWorker: $useAsyncWorker, useSingleTickerProvider: $useSingleTickerProvider, useTickerProvider: $useTickerProvider, event: $event}';
+    return 'AnnotationInfo{name: $name, useLifecycleState: $useLifecycleState, useAsyncWorker: $useAsyncWorker, useSingleTickerProvider: $useSingleTickerProvider, useTickerProvider: $useTickerProvider, event: $event}';
   }
 }

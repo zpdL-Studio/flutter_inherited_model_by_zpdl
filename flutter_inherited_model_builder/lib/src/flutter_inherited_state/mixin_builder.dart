@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:analyzer/dart/element/element.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
-import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/annotation_info.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_state/annotation_info.dart';
 
 class MixinBuilder {
   static String build({
@@ -23,29 +23,13 @@ class MixinBuilder {
     }
     code.line();
 
-    final useStateParameter = StringBuffer();
-    if (constructorParameters.isNotEmpty) {
-      for (final e in constructorParameters) {
-        if (useStateParameter.isNotEmpty) {
-          useStateParameter.write(', ');
-        }
-        useStateParameter.write('${e.type} ${e.name}');
-      }
-    }
-
     code.write('''
-void onInitState() {}
+void onAttachState() {}
 
-void onDidUpdateWidget($useStateParameter) {}
+void onDetachState() {}
 
-void onDispose() {}
+void dispose() {}
 ''');
-
-    if (annotation.useLifecycleState) {
-      code.write('''
-void onDidChangeAppLifecycleState(AppLifecycleState state) {}
-''');
-    }
 
     if (annotation.useAsyncWorker) {
       code.write('''
@@ -55,18 +39,6 @@ void asyncWorker(Future<void> Function() worker, [void Function(Object e, StackT
 ''');
     }
 
-    final event = annotation.event;
-    if (event != null) {
-      code.write('''
-Future<dynamic> emitEvent($event event) => throw UnimplementedError('emitEvent($event event) has not been implemented.');
-''');
-    }
-
-    if(annotation.useSingleTickerProvider || annotation.useTickerProvider) {
-      code.write('''
-TickerProvider get tickerProvider => throw UnimplementedError('tickerProvider has not been implemented.');
-''');
-    }
     code.closeIndent();
     code.write('}');
 

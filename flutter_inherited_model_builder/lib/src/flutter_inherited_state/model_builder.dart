@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:analyzer/dart/element/element.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
-import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/annotation_info.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_state/annotation_info.dart';
 
 class ModelBuilder {
   static String build({
@@ -12,29 +12,26 @@ class ModelBuilder {
     required List<FieldElement> fields,
   }) {
     final code = CodeIndentWriter();
-    final mixins = StringBuffer();
-
-    code.write('class $name extends $elementName${mixins.toString()} {');
+    code.write('''
+class ${name}ChangeNotifier with ChangeNotifier {
+  @override
+  void notifyListeners() {
+    try {
+      super.notifyListeners();
+    } catch(_) {}
+  }
+}
+''');
+    code.write('class $name extends $elementName {');
     code.openIndent();
     code.line();
-    code.write('''
-StateSetter? _\$setState;
-
-// ignore: unused_element
-void _setState(VoidCallback fn) {
-  final setState = _\$setState;
-  if (setState == null) {
-    fn();
-    return;
-  }
-  setState(fn);
-}''');
+    code.write('final _changeNotifier = ${name}ChangeNotifier();');
     code.line();
     if (constructorParameters.isEmpty) {
       code.write('$name(): super._();');
     } else {
       for (final e in constructorParameters) {
-        code.write('${e.type} ${getConstructorName(e.name)};');
+        code.write('final ${e.type} ${getConstructorName(e.name)};');
       }
       code.line();
       code.write('$name({');
@@ -75,9 +72,7 @@ void asyncWorker(Future<void> Function() worker, [void Function(Object e, StackT
   final asyncWorking = _asyncWorking;
   _\$asyncWorkingCount++;
   if (_asyncWorking != asyncWorking) {
-    try {
-      _setState(() {});
-    } catch (_) {}
+    _changeNotifier.notifyListeners();
   }
   try {
     await worker();
@@ -87,35 +82,20 @@ void asyncWorker(Future<void> Function() worker, [void Function(Object e, StackT
     final asyncWorking = _asyncWorking;
     _\$asyncWorkingCount--;
     if (_asyncWorking != asyncWorking) {
-      try {
-        _setState(() {});
-      } catch (_) {}
+      _changeNotifier.notifyListeners();
     }
   }  
 }
 ''');
     }
-
-    final event = annotation.event;
-    if (event != null) {
-      code.write('''
-Future<dynamic> Function($event)? _\$event;
-
+    code.line();
+    code.write('''
 @override
-Future<dynamic> emitEvent($event event) async {
-  return await _\$event?.call(event);
+void dispose() {
+  super.dispose();
+  _changeNotifier.dispose();
 }
 ''');
-    }
-
-    if (annotation.useSingleTickerProvider || annotation.useTickerProvider) {
-      code.write('''
-late final TickerProvider Function() _\$tickerProvider;
-
-@override
-TickerProvider get tickerProvider => _\$tickerProvider();
-''');
-    }
     code.closeIndent();
     code.write('}');
 
@@ -127,7 +107,8 @@ TickerProvider get tickerProvider => _\$tickerProvider();
     return '''
 @override
 set ${field.name}(${field.type} value) {
-  _setState(() => super.${field.name} = value);
+  super.${field.name} = value;
+  _changeNotifier.notifyListeners();
 }
     ''';
   }

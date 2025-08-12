@@ -29,9 +29,6 @@ mixin $MyAppCountModel {
       throw UnimplementedError(
         'emitEvent(MyAppCountModelEvent event) has not been implemented.',
       );
-
-  TickerProvider get tickerProvider =>
-      throw UnimplementedError('tickerProvider has not been implemented.');
 }
 
 class MyAppCountInheritedModel extends StatefulWidget {
@@ -153,15 +150,9 @@ class _$MyAppCountModel extends MyAppCountModel {
   Future<dynamic> emitEvent(MyAppCountModelEvent event) async {
     return await _$event?.call(event);
   }
-
-  late final TickerProvider Function() _$tickerProvider;
-
-  @override
-  TickerProvider get tickerProvider => _$tickerProvider();
 }
 
-class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel>
-    with SingleTickerProviderStateMixin {
+class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel> {
   late final _$MyAppCountModel _model;
   late final AppLifecycleListener _lifecycleStateListener;
   bool _isFrameDraw = false;
@@ -189,8 +180,6 @@ class _MyAppCountInheritedModelState extends State<MyAppCountInheritedModel>
       }
       return null;
     };
-
-    _model._$tickerProvider = () => this;
 
     _model.onInitState();
     _model._$setState = setState;
@@ -266,83 +255,6 @@ class _MyAppCountInheritedModel extends InheritedModel<int> {
     if (dependencies.contains(2) && asyncWorking != oldWidget.asyncWorking) {
       return true;
     }
-    return false;
-  }
-}
-
-mixin $EmptyModel {}
-
-class EmptyInheritedModel extends StatefulWidget {
-  static EmptyModel model(BuildContext context) {
-    return maybeModel(context)!;
-  }
-
-  static EmptyModel? maybeModel(BuildContext context) {
-    return context.getInheritedWidgetOfExactType<_EmptyInheritedModel>()?.model;
-  }
-
-  const EmptyInheritedModel({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  State<EmptyInheritedModel> createState() => _EmptyInheritedModelState();
-}
-
-class _$EmptyModel extends EmptyModel {
-  StateSetter? _$setState;
-
-  // ignore: unused_element
-  void _setState(VoidCallback fn) {
-    final setState = _$setState;
-    if (setState == null) {
-      fn();
-      return;
-    }
-    setState(fn);
-  }
-
-  _$EmptyModel() : super._();
-}
-
-class _EmptyInheritedModelState extends State<EmptyInheritedModel> {
-  late final _$EmptyModel _model;
-
-  @override
-  void initState() {
-    super.initState();
-    _model = _$EmptyModel();
-    _model._$setState = setState;
-  }
-
-  @override
-  void dispose() {
-    _model._$setState = null;
-
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _EmptyInheritedModel(model: _model, child: widget.child);
-  }
-}
-
-class _EmptyInheritedModel extends InheritedModel<int> {
-  final _$EmptyModel model;
-
-  const _EmptyInheritedModel({required this.model, required super.child});
-
-  @override
-  bool updateShouldNotify(_EmptyInheritedModel oldWidget) {
-    return false;
-  }
-
-  @override
-  bool updateShouldNotifyDependent(
-    _EmptyInheritedModel oldWidget,
-    Set<int> dependencies,
-  ) {
     return false;
   }
 }

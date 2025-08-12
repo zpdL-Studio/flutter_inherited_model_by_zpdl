@@ -11,8 +11,6 @@ void main() {
   name: 'MyAppCountInheritedModel',
   useLifecycleState: true,
   useAsyncWorker: true,
-  useSingleTickerProvider: true,
-  // useTickerProvider: true,
   event: MyAppCountModelEvent,
 )
 class MyAppCountModel with $MyAppCountModel {
@@ -27,18 +25,7 @@ class MyAppCountModel with $MyAppCountModel {
   void onInitState() {
     count = 0;
     onSnackBar('MyAppCountModel initState : ');
-    asyncWorker(() async {});
   }
-
-  // @override
-  // void onDidUpdateWidget(String title) {
-  //   super.onDidUpdateWidget(title);
-  // }
-
-  // @override
-  // void onDispose() {
-  //   super.onDispose();
-  // }
 
   void onCountToZero() {
     count = 0;
@@ -52,21 +39,11 @@ class MyAppCountModel with $MyAppCountModel {
 
   @override
   void onDidChangeAppLifecycleState(AppLifecycleState state) {
-    debugPrint(
-      'didChangeAppLifecycleState state: $state)',
-    );
+    debugPrint('didChangeAppLifecycleState state: $state)');
   }
 }
 
 sealed class MyAppCountModelEvent {}
-
-@FlutterInheritedModel(
-  name: 'EmptyInheritedModel',
-  useStateCycle: false
-)
-class EmptyModel with $EmptyModel {
-  EmptyModel._();
-}
 
 class MyAppCountModelSnackBarEvent implements MyAppCountModelEvent {
   final String message;
