@@ -28,8 +28,10 @@ class FlutterInheritedModelBuilder
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
-    print('FlutterInheritedModelBuilder -> element : ${element.name}');
-
+    print('FlutterInheritedModelBuilder -> element : ${element.name}, ${annotation.objectValue.type?.getDisplayString()}');
+    if(annotation.objectValue.type?.getDisplayString() == 'FlutterInheritedModel') {
+      print('FlutterInheritedModelBuilder -> FlutterInheritedModel');
+    }
     final annotationInfo = AnnotationInfo.from(annotation);
     print('FlutterInheritedModelBuilder -> annotation : $annotationInfo');
     if (annotationInfo.useSingleTickerProvider &&
