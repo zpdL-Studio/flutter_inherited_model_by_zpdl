@@ -1,8 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:analyzer/dart/element/element.dart';
-import 'package:flutter_inherited_model_builder/src/annotation_info.dart';
-
-import 'code_indent_writer.dart';
+import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/annotation_info.dart';
 
 class InheritedModelBuilder {
   static String build({
@@ -22,7 +21,9 @@ class InheritedModelBuilder {
     code.line();
     code.write(_buildUpdateShouldNotify(annotation, name, constructor, fields));
     code.line();
-    code.write(_buildUpdateShouldNotifyDependent(annotation, name, constructor, fields));
+    code.write(
+      _buildUpdateShouldNotifyDependent(annotation, name, constructor, fields),
+    );
     code.line();
     code.closeIndent();
     code.write('}');
@@ -32,11 +33,11 @@ class InheritedModelBuilder {
   }
 
   static String _buildField(
-      AnnotationInfo annotation,
-      String modelName,
-      List<ParameterElement> constructorParameters,
-      List<FieldElement> fields,
-      ) {
+    AnnotationInfo annotation,
+    String modelName,
+    List<ParameterElement> constructorParameters,
+    List<FieldElement> fields,
+  ) {
     final code = CodeIndentWriter();
     for (final e in constructorParameters) {
       code.write('final ${e.type} ${e.name};');
@@ -44,7 +45,7 @@ class InheritedModelBuilder {
     for (final e in fields) {
       code.write('final ${e.type} ${e.name};');
     }
-    if(annotation.useAsyncWorker) {
+    if (annotation.useAsyncWorker) {
       code.write('final bool asyncWorking;');
     }
     code.write('final $modelName model;');
@@ -52,10 +53,10 @@ class InheritedModelBuilder {
   }
 
   static String _buildConstruct(
-      AnnotationInfo annotation,
-      String name,
-      List<ParameterElement> constructorParameters,
-      List<FieldElement> fields,
+    AnnotationInfo annotation,
+    String name,
+    List<ParameterElement> constructorParameters,
+    List<FieldElement> fields,
   ) {
     final code = CodeIndentWriter();
     code.write('const $name({');
@@ -66,7 +67,7 @@ class InheritedModelBuilder {
       for (final e in fields) {
         code.write('required this.${e.name},');
       }
-      if(annotation.useAsyncWorker) {
+      if (annotation.useAsyncWorker) {
         code.write('required this.asyncWorking,');
       }
       code.write('required this.model,');
@@ -86,7 +87,7 @@ class InheritedModelBuilder {
     code.write('@override');
     code.write('bool updateShouldNotify($name oldWidget) {');
     code.openIndent();
-    if(constructorParameters.isEmpty && fields.isEmpty) {
+    if (constructorParameters.isEmpty && fields.isEmpty) {
       code.write('return false;');
     } else {
       final sb = StringBuffer();
@@ -116,16 +117,18 @@ class InheritedModelBuilder {
   }
 
   static String _buildUpdateShouldNotifyDependent(
-      AnnotationInfo annotation,
-      String name,
-      List<ParameterElement> constructorParameters,
-      List<FieldElement> fields,
-      ) {
+    AnnotationInfo annotation,
+    String name,
+    List<ParameterElement> constructorParameters,
+    List<FieldElement> fields,
+  ) {
     final code = CodeIndentWriter();
     code.write('@override');
-    code.write('bool updateShouldNotifyDependent($name oldWidget, Set<int> dependencies) {');
+    code.write(
+      'bool updateShouldNotifyDependent($name oldWidget, Set<int> dependencies) {',
+    );
     code.openIndent();
-    if(constructorParameters.isNotEmpty || fields.isNotEmpty) {
+    if (constructorParameters.isNotEmpty || fields.isNotEmpty) {
       final parameter = <String>[
         ...constructorParameters.map((e) => e.name),
         ...fields.map((e) => e.name),

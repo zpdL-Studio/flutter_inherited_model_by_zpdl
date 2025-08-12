@@ -1,8 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:analyzer/dart/element/element.dart';
-
-import 'annotation_info.dart';
-import 'code_indent_writer.dart';
+import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/annotation_info.dart';
 
 class ModelBuilder {
   static String build({
@@ -41,7 +40,7 @@ void _setState(VoidCallback fn) {
       code.write('$name({');
       code.writeIndent((code) {
         for (final e in constructorParameters) {
-          if(e.isRequired) {
+          if (e.isRequired) {
             code.write('required ${e.type} ${e.name},');
           } else {
             code.write('${e.type} ${e.name},');
@@ -50,24 +49,22 @@ void _setState(VoidCallback fn) {
       });
 
       code.write(
-        '}): ${constructorParameters.fold(
-            '', (previousValue, element) => '$previousValue${getConstructorName(
-            element.name)} = ${element.name}, ')}super._();',
+        '}): ${constructorParameters.fold('', (previousValue, element) => '$previousValue${getConstructorName(element.name)} = ${element.name}, ')}super._();',
       );
     }
     code.line();
     if (constructorParameters != null && constructorParameters.isNotEmpty) {
-      for(final e in constructorParameters) {
+      for (final e in constructorParameters) {
         code.write('@override');
         code.write('${e.type} get ${e.name} => ${getConstructorName(e.name)};');
       }
       code.line();
     }
-    for(final e in fields) {
+    for (final e in fields) {
       code.write(_buildField(e));
     }
 
-    if(annotation.useAsyncWorker) {
+    if (annotation.useAsyncWorker) {
       code.write('''
 int _\$asyncWorkingCount = 0;
 
@@ -101,7 +98,7 @@ void asyncWorker(Future<void> Function() worker, [void Function(Object e, StackT
 
     final event = annotation.event;
     if (event != null) {
-        code.write('''
+      code.write('''
 Future<dynamic> Function($event)? _\$event;
 
 @override

@@ -1,9 +1,8 @@
 // ignore_for_file: deprecated_member_use
 import 'package:analyzer/dart/element/element.dart';
-
-import 'annotation_info.dart';
-import 'code_indent_writer.dart';
-import 'model_builder.dart';
+import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/annotation_info.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/model_builder.dart';
 
 class InheritedModelStateBuilder {
   static String build({

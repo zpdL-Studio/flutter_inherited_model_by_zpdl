@@ -4,13 +4,13 @@ import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:flutter_inherited_model/annotation/annotation.dart';
-import 'package:flutter_inherited_model_builder/src/annotation_info.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/annotation_info.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
-import 'package:flutter_inherited_model_builder/src/inherited_model_builder.dart';
-import 'package:flutter_inherited_model_builder/src/inherited_model_state_builder.dart';
-import 'package:flutter_inherited_model_builder/src/inherited_model_widget_builder.dart';
-import 'package:flutter_inherited_model_builder/src/mixin_builder.dart';
-import 'package:flutter_inherited_model_builder/src/model_builder.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/inherited_model_builder.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/inherited_model_state_builder.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/inherited_model_widget_builder.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/mixin_builder.dart';
+import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/model_builder.dart';
 import 'package:source_gen/source_gen.dart';
 
 Builder flutterInheritedModelBuilder(BuilderOptions options) =>
