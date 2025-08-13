@@ -7,50 +7,6 @@ void main() {
   runApp(const MyApp());
 }
 
-@FlutterInheritedModel(
-  name: 'MyAppCountInheritedModel',
-  useLifecycleState: true,
-  useAsyncWorker: true,
-  event: MyAppCountModelEvent,
-)
-class MyAppCountModel with $MyAppCountModel {
-  @inheritedModelState
-  late int count;
-
-  MyAppCountModel._();
-
-  factory MyAppCountModel({required String title}) = _$MyAppCountModel;
-
-  @override
-  void onInitState() {
-    count = 0;
-    onSnackBar('MyAppCountModel initState : ');
-  }
-
-  void onCountToZero() {
-    count = 0;
-  }
-
-  void onSnackBar(String message) async {
-    debugPrint(
-      'onSnackBar result: ${await emitEvent(MyAppCountModelSnackBarEvent(message))}',
-    );
-  }
-
-  @override
-  void onDidChangeAppLifecycleState(AppLifecycleState state) {
-    debugPrint('didChangeAppLifecycleState state: $state)');
-  }
-}
-
-sealed class MyAppCountModelEvent {}
-
-class MyAppCountModelSnackBarEvent implements MyAppCountModelEvent {
-  final String message;
-
-  MyAppCountModelSnackBarEvent(this.message);
-}
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -61,38 +17,109 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: Builder(
-        builder: (context) {
-          return MyAppCountInheritedModel(
-            title: 'Flutter Inherited Model Page',
-            onEvent: (MyAppCountModel model, MyAppCountModelEvent event) async {
-              switch (event) {
-                case MyAppCountModelSnackBarEvent():
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(event.message)));
-                  return true;
-              }
-            },
-            child: MyHomePage(),
-          );
-        },
-      ),
+      home: MainPage(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
+@FlutterInheritedModel(
+  name: 'MainInheritedModel',
+  event: MainModelEvent,
+)
+class MainModel with $MainModel {
+  MainModel._();
+  factory MainModel() = _$MainModel;
+
+  @inheritedModelState
+  late int count;
+
+  final userState = UserState();
+
+  @override
+  void onInitState() {
+    super.onInitState();
+    count = 0;
+
+    userState.name = 'Gemini';
+    userState.age = 1;
+  }
+
+  @override
+  void onDispose() {
+    userState.dispose();
+    super.onDispose();
+  }
+
+  void onIncrement() {
+    count++;
+  }
+
+  void onShowSnapBar(String message) {
+    emitEvent(MainModelSnackBarEvent(message));
+  }
+}
+
+sealed class MainModelEvent {}
+
+class MainModelSnackBarEvent implements MainModelEvent {
+  final String message;
+
+  MainModelSnackBarEvent(this.message);
+}
+
+@FlutterInheritedState(name: 'UserInheritedState')
+class UserState with $UserState {
+
+  UserState._();
+
+  factory UserState() = _$UserState;
+
+  @inheritedModelState
+  late String name;
+
+  @inheritedModelState
+  late int age;
+
+  @override
+  void onAttachState() {
+    super.onAttachState();
+    debugPrint('UserState onAttachState');
+  }
+
+  @override
+  void onDetachState() {
+    debugPrint('UserState onDetachState');
+    super.onDetachState();
+  }
+}
+
+class MainPage extends StatelessWidget {
+  const MainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final model = MyAppCountInheritedModel.model(context);
+    return MainInheritedModel(
+      onEvent: (MainModel model, MainModelEvent event) async {
+        switch (event) {
+          case MainModelSnackBarEvent():
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(event.message)));
+            return true;
+        }
+      },
+      child: _MainPage(),
+    );
+  }
+}
+
+class _MainPage extends StatelessWidget {
+  const _MainPage();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(MyAppCountInheritedModel.titleOf(context)),
-      ),
+      appBar: AppBar(title: const Text('InheritedModel Example')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -101,29 +128,66 @@ class MyHomePage extends StatelessWidget {
             Builder(
               builder: (context) {
                 return Text(
-                  '${MyAppCountInheritedModel.countOf(context)}',
+                  '${MainInheritedModel.countOf(context)}',
                   style: Theme.of(context).textTheme.headlineMedium,
                 );
               },
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                model.onCountToZero();
-                model.onSnackBar('Count to zero');
-              },
-              child: Text('Count to zero'),
-            ),
+            UserInheritedState(
+                state: MainInheritedModel
+                    .model(context)
+                    .userState,
+                child: UserProfileWidget())
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          model.count = model.count + 1;
+          MainInheritedModel.model(context).onIncrement();
+          MainInheritedModel.model(context).onShowSnapBar('Increment');
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+    );
+  }
+}
+
+class UserProfileWidget extends StatelessWidget {
+  const UserProfileWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // UserState의 name이 변경될 때만 리빌드
+    final userName = UserInheritedState.nameOf(context);
+    // UserState의 age가 변경될 때만 리빌드
+    final userAge = UserInheritedState.ageOf(context);
+
+    return Column(
+      children: [
+        Text('User Name: $userName'),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(onPressed: () {
+              UserInheritedState.model(context).age--;
+            }, icon: Icon(Icons.exposure_minus_1)),
+            Text('User Age: $userAge'),
+            IconButton(onPressed: () {
+              UserInheritedState.model(context).age++;
+            }, icon: Icon(Icons.exposure_plus_1)),
+          ],
+        ),
+        ElevatedButton(
+          onPressed: () {
+            // 모델을 통해 하위 상태의 메소드 호출
+            final model = UserInheritedState.model(context);
+            model.name = 'Bard';
+            model.age = 2;
+          },
+          child: const Text('Update User'),
+        ),
+      ],
     );
   }
 }

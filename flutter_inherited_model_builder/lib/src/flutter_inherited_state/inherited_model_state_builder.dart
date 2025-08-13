@@ -22,7 +22,7 @@ late $modelName _model;
 @override
 void initState() {
   super.initState();
-  _model = widget.value as $modelName;
+  _model = widget.state as $modelName;
   _model.onAttachState();
   _model._changeNotifier.addListener(_updateValue);
 }
@@ -30,10 +30,10 @@ void initState() {
 @override
 void didUpdateWidget($inheritedModelName oldWidget) {
   super.didUpdateWidget(oldWidget);
-  if(_model != widget.value) {
+  if(_model != widget.state) {
     _model._changeNotifier.removeListener(_updateValue);
     _model.onDetachState();
-    _model = widget.value as $modelName;
+    _model = widget.state as $modelName;
     _model.onAttachState();
     _model._changeNotifier.addListener(_updateValue);
   }

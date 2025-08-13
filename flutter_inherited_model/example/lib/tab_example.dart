@@ -158,11 +158,11 @@ class MainTapPage extends StatelessWidget {
           child: TabBarView(
             controller: model.tabController,
             children: [
-              HomeInheritedState(value: model.homeState, child: _HomeWidget()),
+              HomeInheritedState(state: model.homeState, child: _HomeWidget()),
               Builder(
                 builder: (context) {
                   return ShoppingInheritedState(
-                    value: MainInheritedModel.shoppingStateOf(context),
+                    state: MainInheritedModel.shoppingStateOf(context),
                     child: _ShoppingWidget(),
                   );
                 },

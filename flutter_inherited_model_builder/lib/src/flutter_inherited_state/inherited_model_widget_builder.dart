@@ -101,15 +101,15 @@ static $type? maybe${name.substring(0, 1).toUpperCase()}${name.substring(1)}Of(B
     return '''
 const $name({
   super.key,
-  required this.value,
+  required this.state,
   required this.child,
-}): assert(value is $modelName);
+}): assert(state is $modelName);
 ''';
   }
 
   static String _buildInheritedModelField(String elementName) {
     return '''
-final $elementName value;
+final $elementName state;
 final Widget child;
 ''';
   }

@@ -245,11 +245,11 @@ class HomeInheritedState extends StatefulWidget {
 
   const HomeInheritedState({
     super.key,
-    required this.value,
+    required this.state,
     required this.child,
-  }) : assert(value is _$HomeState);
+  }) : assert(state is _$HomeState);
 
-  final HomeState value;
+  final HomeState state;
   final Widget child;
 
   @override
@@ -321,7 +321,7 @@ class _HomeInheritedStateState extends State<HomeInheritedState> {
   @override
   void initState() {
     super.initState();
-    _model = widget.value as _$HomeState;
+    _model = widget.state as _$HomeState;
     _model.onAttachState();
     _model._changeNotifier.addListener(_updateValue);
   }
@@ -329,10 +329,10 @@ class _HomeInheritedStateState extends State<HomeInheritedState> {
   @override
   void didUpdateWidget(HomeInheritedState oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_model != widget.value) {
+    if (_model != widget.state) {
       _model._changeNotifier.removeListener(_updateValue);
       _model.onDetachState();
-      _model = widget.value as _$HomeState;
+      _model = widget.state as _$HomeState;
       _model.onAttachState();
       _model._changeNotifier.addListener(_updateValue);
     }
@@ -442,11 +442,11 @@ class ShoppingInheritedState extends StatefulWidget {
 
   const ShoppingInheritedState({
     super.key,
-    required this.value,
+    required this.state,
     required this.child,
-  }) : assert(value is _$ShoppingState);
+  }) : assert(state is _$ShoppingState);
 
-  final ShoppingState value;
+  final ShoppingState state;
   final Widget child;
 
   @override
@@ -491,7 +491,7 @@ class _ShoppingInheritedStateState extends State<ShoppingInheritedState> {
   @override
   void initState() {
     super.initState();
-    _model = widget.value as _$ShoppingState;
+    _model = widget.state as _$ShoppingState;
     _model.onAttachState();
     _model._changeNotifier.addListener(_updateValue);
   }
@@ -499,10 +499,10 @@ class _ShoppingInheritedStateState extends State<ShoppingInheritedState> {
   @override
   void didUpdateWidget(ShoppingInheritedState oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_model != widget.value) {
+    if (_model != widget.state) {
       _model._changeNotifier.removeListener(_updateValue);
       _model.onDetachState();
-      _model = widget.value as _$ShoppingState;
+      _model = widget.state as _$ShoppingState;
       _model.onAttachState();
       _model._changeNotifier.addListener(_updateValue);
     }
