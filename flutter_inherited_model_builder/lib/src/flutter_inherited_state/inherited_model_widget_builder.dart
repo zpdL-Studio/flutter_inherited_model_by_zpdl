@@ -1,5 +1,4 @@
-// ignore_for_file: deprecated_member_use
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
 import 'package:flutter_inherited_model_builder/src/flutter_inherited_state/annotation_info.dart';
@@ -13,8 +12,8 @@ class InheritedModelWidgetBuilder {
     required String modelName,
     required String inheritedModelWidgetName,
     required String inheritedModelStateName,
-    required List<ParameterElement> constructorParameters,
-    required List<FieldElement> fields,
+    required List<FormalParameterElement> constructorParameters,
+    required List<FieldElement2> fields,
   }) {
     final code = CodeIndentWriter();
     code.write('class $name extends StatefulWidget {');
@@ -63,12 +62,14 @@ State<$name> createState() => $inheritedModelStateName();
 
   static String _buildInheritedModelOf(
     String inheritedModelWidgetName,
-    List<ParameterElement> constructorParameters,
-    List<FieldElement> fields,
+    List<FormalParameterElement> constructorParameters,
+    List<FieldElement2> fields,
   ) {
     final parameter = <(DartType type, bool optional, String name)>[
-      ...constructorParameters.map((e) => (e.type, e.isOptional, e.name)),
-      ...fields.map((e) => (e.type, e.type.isOptional(), e.name)),
+      ...constructorParameters.map(
+        (e) => (e.type, e.isOptional, e.displayName),
+      ),
+      ...fields.map((e) => (e.type, e.type.isOptional(), e.displayName)),
     ];
 
     final code = CodeIndentWriter();

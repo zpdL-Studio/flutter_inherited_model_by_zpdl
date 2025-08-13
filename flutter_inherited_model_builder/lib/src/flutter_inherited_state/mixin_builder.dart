@@ -1,5 +1,4 @@
-// ignore_for_file: deprecated_member_use
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
 import 'package:flutter_inherited_model_builder/src/flutter_inherited_state/annotation_info.dart';
 
@@ -7,8 +6,8 @@ class MixinBuilder {
   static String build({
     required AnnotationInfo annotation,
     required String name,
-    required List<ParameterElement> constructorParameters,
-    required List<FieldElement> fields,
+    required List<FormalParameterElement> constructorParameters,
+    required List<FieldElement2> fields,
   }) {
     final code = CodeIndentWriter();
     code.write('mixin $name {');
@@ -17,7 +16,7 @@ class MixinBuilder {
     if (constructorParameters.isNotEmpty) {
       for (final e in constructorParameters) {
         code.write(
-          '${e.type} get ${e.name} => throw UnimplementedError(\'${e.name} has not been implemented.\');',
+          '${e.type} get ${e.displayName} => throw UnimplementedError(\'${e.displayName} has not been implemented.\');',
         );
       }
     }

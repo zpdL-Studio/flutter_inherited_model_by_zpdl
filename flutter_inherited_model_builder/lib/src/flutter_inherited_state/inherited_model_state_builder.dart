@@ -1,5 +1,4 @@
-// ignore_for_file: deprecated_member_use
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
 import 'package:flutter_inherited_model_builder/src/flutter_inherited_state/annotation_info.dart';
 
@@ -10,8 +9,8 @@ class InheritedModelStateBuilder {
     required String inheritedModelName,
     required String modelName,
     required String inheritedModelWidgetName,
-    required List<ParameterElement> constructorParameters,
-    required List<FieldElement> fields,
+    required List<FormalParameterElement> constructorParameters,
+    required List<FieldElement2> fields,
   }) {
     final code = CodeIndentWriter();
     code.write('class $name extends State<$inheritedModelName> {');
@@ -71,8 +70,8 @@ void _updateValue() {
   static String _build(
     AnnotationInfo annotation,
     String inheritedModelWidgetName,
-    List<ParameterElement> constructorParameters,
-    List<FieldElement> fields,
+    List<FormalParameterElement> constructorParameters,
+    List<FieldElement2> fields,
   ) {
     final code = CodeIndentWriter();
     code.write('''
@@ -82,10 +81,10 @@ Widget build(BuildContext context) {''');
     code.write('return $inheritedModelWidgetName(');
     code.writeIndent((code) {
       for (final e in constructorParameters) {
-        code.write('${e.name}: _model.${e.name},');
+        code.write('${e.displayName}: _model.${e.displayName},');
       }
       for (final e in fields) {
-        code.write('${e.name}: _model.${e.name},');
+        code.write('${e.displayName}: _model.${e.displayName},');
       }
       if (annotation.useAsyncWorker) {
         code.write('asyncWorking: _model._asyncWorking,');

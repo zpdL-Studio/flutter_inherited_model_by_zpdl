@@ -1,7 +1,6 @@
-// ignore_for_file: deprecated_member_use
 import 'dart:async';
 
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:build/build.dart';
 import 'package:flutter_inherited_model/annotation/annotation.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
@@ -19,15 +18,15 @@ class FlutterInheritedModelBuilder
 
   @override
   FutureOr<String> generateForAnnotatedElement(
-    Element element,
+    Element2 element,
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
     print(
-      'FlutterInheritedModelBuilder -> element : ${element.name}, ${annotation.objectValue.type?.getDisplayString()}',
+      'FlutterInheritedModelBuilder -> element : ${element.displayName}, ${annotation.objectValue.type?.getDisplayString()}',
     );
 
-    if (element is! ClassElement) {
+    if (element is! ClassElement2) {
       throw InvalidGenerationSourceError(
         'Generator cannot be applied to ${element.displayName}.',
         todo: 'This annotation can only be used on classes.',
@@ -43,13 +42,16 @@ class FlutterInheritedModelBuilder
       );
     }
 
-    ConstructorElement? privateConstructor;
-    ConstructorElement? factoryConstructor;
+    ConstructorElement2? privateConstructor;
+    ConstructorElement2? factoryConstructor;
 
-    for (final constructor in element.constructors) {
-      if (constructor.name == '' && constructor.isFactory) {
+    for (final constructor in element.constructors2) {
+      print('constructor.displayName : ${constructor.displayName}');
+      if (constructor.displayName == element.displayName &&
+          constructor.isFactory) {
         factoryConstructor = constructor;
-      } else if (constructor.name == '_' && !constructor.isFactory) {
+      } else if (constructor.displayName == '${element.displayName}._' &&
+          !constructor.isFactory) {
         privateConstructor = constructor;
       }
     }
@@ -62,14 +64,14 @@ class FlutterInheritedModelBuilder
       );
     }
 
-    final List<ParameterElement>? factoryConstructorParameters;
+    final List<FormalParameterElement>? factoryConstructorParameters;
     if (factoryConstructor != null) {
-      factoryConstructorParameters = <ParameterElement>[];
-      for (final parameter in factoryConstructor.parameters) {
+      factoryConstructorParameters = <FormalParameterElement>[];
+      for (final parameter in factoryConstructor.formalParameters) {
         if (parameter.isRequiredNamed || parameter.isOptionalNamed) {
           factoryConstructorParameters.add(parameter);
         } else {
-          final name = parameter.name;
+          final name = parameter.displayName;
           throw InvalidGenerationSourceError(
             'The construct parameter `$name` is only named parameter',
             todo: 'Please ensure `$name` is changed named parameter',
@@ -81,15 +83,15 @@ class FlutterInheritedModelBuilder
       factoryConstructorParameters = null;
     }
 
-    final stateTypeChecker = TypeChecker.fromRuntime(InheritedModelState);
+    final stateTypeChecker = TypeChecker.typeNamed(InheritedModelState);
 
-    final fields = <FieldElement>[];
-    for (final field in element.fields) {
+    final fields = <FieldElement2>[];
+    for (final field in element.fields2) {
       if (stateTypeChecker.hasAnnotationOf(field)) {
         if (!field.isStatic && !field.isFinal && field.isPublic) {
           fields.add(field);
         } else {
-          final fieldName = field.name;
+          final fieldName = field.displayName;
           throw InvalidGenerationSourceError(
             'The field `$fieldName` annotated with `@FlutterInheritedModelState` must be public, non-static, and non-final.',
             todo:
@@ -114,10 +116,10 @@ class FlutterInheritedModelBuilder
 
     final code = CodeIndentWriter();
 
-    final mixinName = '\$${element.name}';
-    final modelName = '_\$${element.name}';
+    final mixinName = '\$${element.displayName}';
+    final modelName = '_\$${element.displayName}';
     final inheritedModelName =
-        annotationInfo.name ?? '${element.name}InheritedModel';
+        annotationInfo.name ?? '${element.displayName}InheritedModel';
     final inheritedModelStateName = '_${inheritedModelName}State';
     final inheritedModelWidgetName = '_$inheritedModelName';
 
@@ -134,7 +136,7 @@ class FlutterInheritedModelBuilder
       InheritedModelWidgetBuilder.build(
         annotation: annotationInfo,
         name: inheritedModelName,
-        elementName: element.name,
+        elementName: element.displayName,
         inheritedModelWidgetName: inheritedModelWidgetName,
         inheritedModelStateName: inheritedModelStateName,
         constructorParameters: factoryConstructorParameters ?? [],
@@ -146,7 +148,7 @@ class FlutterInheritedModelBuilder
       ModelBuilder.build(
         annotation: annotationInfo,
         name: modelName,
-        elementName: element.name,
+        elementName: element.displayName,
         constructorParameters: factoryConstructorParameters ?? [],
         fields: fields,
       ),

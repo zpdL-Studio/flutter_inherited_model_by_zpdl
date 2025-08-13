@@ -1,5 +1,4 @@
-// ignore_for_file: deprecated_member_use
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
 import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/annotation_info.dart';
@@ -12,8 +11,8 @@ class InheritedModelWidgetBuilder {
     required String elementName,
     required String inheritedModelWidgetName,
     required String inheritedModelStateName,
-    required List<ParameterElement> constructorParameters,
-    required List<FieldElement> fields,
+    required List<FormalParameterElement> constructorParameters,
+    required List<FieldElement2> fields,
   }) {
     final code = CodeIndentWriter();
     code.write('class $name extends StatefulWidget {');
@@ -66,12 +65,14 @@ State<$name> createState() => $inheritedModelStateName();
 
   static String _buildInheritedModelOf(
     String inheritedModelWidgetName,
-    List<ParameterElement> constructorParameters,
-    List<FieldElement> fields,
+    List<FormalParameterElement> constructorParameters,
+    List<FieldElement2> fields,
   ) {
     final parameter = <(DartType type, bool optional, String name)>[
-      ...constructorParameters.map((e) => (e.type, e.isOptional, e.name)),
-      ...fields.map((e) => (e.type, e.type.isOptional(), e.name)),
+      ...constructorParameters.map(
+        (e) => (e.type, e.isOptional, e.displayName),
+      ),
+      ...fields.map((e) => (e.type, e.type.isOptional(), e.displayName)),
     ];
 
     final code = CodeIndentWriter();
@@ -102,7 +103,7 @@ static $type? maybe${name.substring(0, 1).toUpperCase()}${name.substring(1)}Of(B
   static String _buildInheritedModelConstructor(
     String name,
     AnnotationInfo annotation,
-    List<ParameterElement> constructorParameters,
+    List<FormalParameterElement> constructorParameters,
   ) {
     if (constructorParameters.isEmpty) {
       final event = annotation.event;
@@ -117,7 +118,7 @@ static $type? maybe${name.substring(0, 1).toUpperCase()}${name.substring(1)}Of(B
     code.write('super.key,');
     for (final e in constructorParameters) {
       final sb = StringBuffer();
-      final name = e.name;
+      final name = e.displayName;
       if (e.isRequiredNamed) {
         sb.write('required this.$name');
       } else if (e.isOptionalNamed) {
@@ -144,12 +145,12 @@ static $type? maybe${name.substring(0, 1).toUpperCase()}${name.substring(1)}Of(B
   static String _buildInheritedModelField(
     AnnotationInfo annotation,
     String elementName,
-    List<ParameterElement> constructorParameters,
+    List<FormalParameterElement> constructorParameters,
   ) {
     final code = CodeIndentWriter();
     if (constructorParameters.isNotEmpty) {
       for (final e in constructorParameters) {
-        code.write('final ${e.type} ${e.name};');
+        code.write('final ${e.type} ${e.displayName};');
       }
     }
     final event = annotation.event;

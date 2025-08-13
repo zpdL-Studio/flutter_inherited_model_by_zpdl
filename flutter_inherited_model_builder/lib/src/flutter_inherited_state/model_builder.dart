@@ -1,5 +1,4 @@
-// ignore_for_file: deprecated_member_use
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
 import 'package:flutter_inherited_model_builder/src/flutter_inherited_state/annotation_info.dart';
 
@@ -8,8 +7,8 @@ class ModelBuilder {
     required AnnotationInfo annotation,
     required String name,
     required String elementName,
-    required List<ParameterElement> constructorParameters,
-    required List<FieldElement> fields,
+    required List<FormalParameterElement> constructorParameters,
+    required List<FieldElement2> fields,
   }) {
     final code = CodeIndentWriter();
     code.write('''
@@ -31,29 +30,31 @@ class ${name}ChangeNotifier with ChangeNotifier {
       code.write('$name(): super._();');
     } else {
       for (final e in constructorParameters) {
-        code.write('final ${e.type} ${getConstructorName(e.name)};');
+        code.write('final ${e.type} ${getConstructorName(e.displayName)};');
       }
       code.line();
       code.write('$name({');
       code.writeIndent((code) {
         for (final e in constructorParameters) {
           if (e.isRequired) {
-            code.write('required ${e.type} ${e.name},');
+            code.write('required ${e.type} ${e.displayName},');
           } else {
-            code.write('${e.type} ${e.name},');
+            code.write('${e.type} ${e.displayName},');
           }
         }
       });
 
       code.write(
-        '}): ${constructorParameters.fold('', (previousValue, element) => '$previousValue${getConstructorName(element.name)} = ${element.name}, ')}super._();',
+        '}): ${constructorParameters.fold('', (previousValue, element) => '$previousValue${getConstructorName(element.displayName)} = ${element.displayName}, ')}super._();',
       );
     }
     code.line();
     if (constructorParameters.isNotEmpty) {
       for (final e in constructorParameters) {
         code.write('@override');
-        code.write('${e.type} get ${e.name} => ${getConstructorName(e.name)};');
+        code.write(
+          '${e.type} get ${e.displayName} => ${getConstructorName(e.displayName)};',
+        );
       }
       code.line();
     }
@@ -103,11 +104,11 @@ void dispose() {
     return code.toString();
   }
 
-  static String _buildField(FieldElement field) {
+  static String _buildField(FieldElement2 field) {
     return '''
 @override
-set ${field.name}(${field.type} value) {
-  super.${field.name} = value;
+set ${field.displayName}(${field.type} value) {
+  super.${field.displayName} = value;
   _changeNotifier.notifyListeners();
 }
     ''';

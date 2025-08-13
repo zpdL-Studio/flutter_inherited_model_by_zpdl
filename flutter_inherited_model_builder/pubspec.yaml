@@ -11,8 +11,8 @@ dependencies:
   flutter_inherited_model: ^0.9.1
 
   analyzer: ^7.7.1
-  build: ^2.0.0
-  source_gen: ^2.0.0
+  build: ^3.0.0
+  source_gen: ^3.0.0
 
 dev_dependencies:
   flutter_test:

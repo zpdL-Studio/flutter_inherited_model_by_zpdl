@@ -1,5 +1,4 @@
-// ignore_for_file: deprecated_member_use
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
 import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/annotation_info.dart';
 import 'package:flutter_inherited_model_builder/src/flutter_inherited_model/model_builder.dart';
@@ -11,8 +10,8 @@ class InheritedModelStateBuilder {
     required String inheritedModelName,
     required String modelName,
     required String inheritedModelWidgetName,
-    required List<ParameterElement> constructorParameters,
-    required List<FieldElement> fields,
+    required List<FormalParameterElement> constructorParameters,
+    required List<FieldElement2> fields,
   }) {
     final code = CodeIndentWriter();
     final mixins = StringBuffer();
@@ -60,7 +59,7 @@ class InheritedModelStateBuilder {
   static String _buildInitState(
     AnnotationInfo annotation,
     String modelName,
-    List<ParameterElement> constructorParameters,
+    List<FormalParameterElement> constructorParameters,
   ) {
     final code = CodeIndentWriter();
     code.write('@override');
@@ -74,7 +73,7 @@ class InheritedModelStateBuilder {
       code.write('_model = $modelName(');
       code.openIndent();
       for (final e in constructorParameters) {
-        code.write('${e.name}: widget.${e.name},');
+        code.write('${e.displayName}: widget.${e.displayName},');
       }
       code.closeIndent();
       code.write(');');
@@ -121,7 +120,7 @@ _model._\$event = (e) async {
 
   static String _buildDidUpdateWidget(
     String inheritedModelName,
-    List<ParameterElement> constructorParameters,
+    List<FormalParameterElement> constructorParameters,
   ) {
     final compareString = StringBuffer();
     final didUpdateString = StringBuffer();
@@ -129,11 +128,13 @@ _model._\$event = (e) async {
       if (compareString.isNotEmpty) {
         compareString.write(' || ');
       }
-      compareString.write('widget.${e.name} != oldWidget.${e.name}');
+      compareString.write(
+        'widget.${e.displayName} != oldWidget.${e.displayName}',
+      );
       if (didUpdateString.isNotEmpty) {
         didUpdateString.write(', ');
       }
-      didUpdateString.write('widget.${e.name}');
+      didUpdateString.write('widget.${e.displayName}');
     }
 
     final code = CodeIndentWriter();
@@ -148,7 +149,7 @@ void didUpdateWidget($inheritedModelName oldWidget) {
       code.write('_model.onDidUpdateWidget(${didUpdateString.toString()});');
       for (final e in constructorParameters) {
         code.write(
-          '_model.${ModelBuilder.getConstructorName(e.name)} = widget.${e.name};',
+          '_model.${ModelBuilder.getConstructorName(e.displayName)} = widget.${e.displayName};',
         );
       }
     });
@@ -174,8 +175,8 @@ void dispose() {
   static String _build(
     AnnotationInfo annotation,
     String inheritedModelWidgetName,
-    List<ParameterElement> constructorParameters,
-    List<FieldElement> fields,
+    List<FormalParameterElement> constructorParameters,
+    List<FieldElement2> fields,
   ) {
     final code = CodeIndentWriter();
     code.write('''
@@ -188,10 +189,10 @@ Widget build(BuildContext context) {''');
     code.write('return $inheritedModelWidgetName(');
     code.writeIndent((code) {
       for (final e in constructorParameters) {
-        code.write('${e.name}: _model.${e.name},');
+        code.write('${e.displayName}: _model.${e.displayName},');
       }
       for (final e in fields) {
-        code.write('${e.name}: _model.${e.name},');
+        code.write('${e.displayName}: _model.${e.displayName},');
       }
       if (annotation.useAsyncWorker) {
         code.write('asyncWorking: _model._asyncWorking,');

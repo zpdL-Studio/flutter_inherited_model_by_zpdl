@@ -1,5 +1,4 @@
-// ignore_for_file: deprecated_member_use
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:flutter_inherited_model_builder/src/code_indent_writer.dart';
 import 'package:flutter_inherited_model_builder/src/flutter_inherited_state/annotation_info.dart';
 
@@ -8,8 +7,8 @@ class InheritedModelBuilder {
     required AnnotationInfo annotation,
     required String name,
     required String modelName,
-    required List<ParameterElement> constructorParameters,
-    required List<FieldElement> fields,
+    required List<FormalParameterElement> constructorParameters,
+    required List<FieldElement2> fields,
   }) {
     final code = CodeIndentWriter();
     code.write('class $name extends InheritedModel<int> {');
@@ -45,15 +44,15 @@ class InheritedModelBuilder {
   static String _buildField(
     AnnotationInfo annotation,
     String modelName,
-    List<ParameterElement> constructorParameters,
-    List<FieldElement> fields,
+    List<FormalParameterElement> constructorParameters,
+    List<FieldElement2> fields,
   ) {
     final code = CodeIndentWriter();
     for (final e in constructorParameters) {
-      code.write('final ${e.type} ${e.name};');
+      code.write('final ${e.type} ${e.displayName};');
     }
     for (final e in fields) {
-      code.write('final ${e.type} ${e.name};');
+      code.write('final ${e.type} ${e.displayName};');
     }
     if (annotation.useAsyncWorker) {
       code.write('final bool asyncWorking;');
@@ -65,17 +64,17 @@ class InheritedModelBuilder {
   static String _buildConstruct(
     AnnotationInfo annotation,
     String name,
-    List<ParameterElement> constructorParameters,
-    List<FieldElement> fields,
+    List<FormalParameterElement> constructorParameters,
+    List<FieldElement2> fields,
   ) {
     final code = CodeIndentWriter();
     code.write('const $name({');
     code.writeIndent((code) {
       for (final e in constructorParameters) {
-        code.write('required this.${e.name},');
+        code.write('required this.${e.displayName},');
       }
       for (final e in fields) {
-        code.write('required this.${e.name},');
+        code.write('required this.${e.displayName},');
       }
       if (annotation.useAsyncWorker) {
         code.write('required this.asyncWorking,');
@@ -90,8 +89,8 @@ class InheritedModelBuilder {
   static String _buildUpdateShouldNotify(
     AnnotationInfo annotation,
     String name,
-    List<ParameterElement> constructorParameters,
-    List<FieldElement> fields,
+    List<FormalParameterElement> constructorParameters,
+    List<FieldElement2> fields,
   ) {
     final code = CodeIndentWriter();
     code.write('@override');
@@ -105,13 +104,13 @@ class InheritedModelBuilder {
         if (sb.isNotEmpty) {
           sb.write(' || ');
         }
-        sb.write('${e.name} != oldWidget.${e.name}');
+        sb.write('${e.displayName} != oldWidget.${e.displayName}');
       }
       for (final e in fields) {
         if (sb.isNotEmpty) {
           sb.write(' || ');
         }
-        sb.write('${e.name} != oldWidget.${e.name}');
+        sb.write('${e.displayName} != oldWidget.${e.displayName}');
       }
       if (annotation.useAsyncWorker) {
         if (sb.isNotEmpty) {
@@ -129,8 +128,8 @@ class InheritedModelBuilder {
   static String _buildUpdateShouldNotifyDependent(
     AnnotationInfo annotation,
     String name,
-    List<ParameterElement> constructorParameters,
-    List<FieldElement> fields,
+    List<FormalParameterElement> constructorParameters,
+    List<FieldElement2> fields,
   ) {
     final code = CodeIndentWriter();
     code.write('@override');
@@ -140,8 +139,8 @@ class InheritedModelBuilder {
     code.openIndent();
     if (constructorParameters.isNotEmpty || fields.isNotEmpty) {
       final parameter = <String>[
-        ...constructorParameters.map((e) => e.name),
-        ...fields.map((e) => e.name),
+        ...constructorParameters.map((e) => e.displayName),
+        ...fields.map((e) => e.displayName),
       ];
 
       for (int i = 0; i < parameter.length; i++) {
