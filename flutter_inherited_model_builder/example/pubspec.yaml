@@ -2,7 +2,7 @@ name: example
 description: "flutter_inherited_model_builder example"
 publish_to: 'none'
 
-version: 0.9.2+3
+version: 0.9.3+4
 
 environment:
   sdk: ^3.7.2
@@ -18,7 +18,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-#  flutter_inherited_model_builder: ^0.9.2
+#  flutter_inherited_model_builder: ^0.9.3
   flutter_inherited_model_builder:
     path: ../
 

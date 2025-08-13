@@ -3,26 +3,26 @@
 [![pub package](https://img.shields.io/pub/v/flutter_inherited_model_builder.svg)](https://pub.dev/packages/flutter_inherited_model_builder)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-이 패키지는 [flutter_inherited_model](https://pub.dev/packages/flutter_inherited_model)의 코드 생성을 위한 빌더(builder)입니다.
+This package is the builder for code generation for [flutter_inherited_model](https://pub.dev/packages/flutter_inherited_model).
 
-## 중요
+## Important
 
-이 패키지를 직접 사용할 일은 거의 없습니다. `flutter_inherited_model` 패키지의 일부로, 코드 생성을 자동화하는 역할을 담당합니다.
+You will rarely need to use this package directly. It is part of the `flutter_inherited_model` package and is responsible for automating code generation.
 
-자세한 사용법과 기능은 메인 패키지의 문서를 참고해주세요.
+For detailed usage and features, please refer to the main package's documentation.
 
-- **[flutter_inherited_model 패키지 바로가기](https://pub.dev/packages/flutter_inherited_model)**
+- **[Go to flutter_inherited_model package](https://pub.dev/packages/flutter_inherited_model)**
 
-## 설치하기
+## Installation
 
-`pubspec.yaml` 파일의 `dev_dependencies`에 아래와 같이 `build_runner`와 함께 추가합니다.
+Add this to your `pubspec.yaml` file's `dev_dependencies` along with `build_runner`.
 
 ```yaml
 dev_dependencies:
-  flutter_inherited_model_builder: ^0.9.1 # 최신 버전을 확인해주세요.
-  build_runner: ^2.4.10 # build_runner 버전은 호환성에 맞게 조정될 수 있습니다.
+  flutter_inherited_model_builder: ^0.9.1 # Please check for the latest version.
+  build_runner: ^2.4.10 # The build_runner version may be adjusted for compatibility.
 ```
 
-## 라이선스
+## License
 
-이 프로젝트는 MIT 라이선스를 따릅니다. 자세한 내용은 `LICENSE` 파일을 참고하세요.
+This project is licensed under the MIT License. See the `LICENSE` file for details.
