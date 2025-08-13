@@ -10,3 +10,7 @@
 ## 0.9.1
 
 * add FlutterInheritedState
+
+## 0.9.2
+
+* update README.md

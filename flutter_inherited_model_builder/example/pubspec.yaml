@@ -11,9 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-#  flutter_inherited_model: ^0.9.2
-  flutter_inherited_model:
-    path: ../../flutter_inherited_model
+  flutter_inherited_model: ^0.9.1
+#  flutter_inherited_model:
+#    path: ../../flutter_inherited_model
 dev_dependencies:
   flutter_test:
     sdk: flutter
