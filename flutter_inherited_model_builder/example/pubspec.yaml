@@ -2,7 +2,7 @@ name: example
 description: "flutter_inherited_model_builder example"
 publish_to: 'none'
 
-version: 0.9.3+4
+version: 0.9.4+5
 
 environment:
   sdk: ^3.7.2
@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
 
   flutter_inherited_model: ^0.9.1
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.9.0
 #  flutter_inherited_model:
 #    path: ../../flutter_inherited_model
 dev_dependencies:
@@ -23,7 +25,9 @@ dev_dependencies:
     path: ../
 
   flutter_lints: ^5.0.0
-
+  build_runner: ^2.6.0
+  freezed: ^3.2.0
+  json_serializable: ^6.10.0
 
 flutter:
 

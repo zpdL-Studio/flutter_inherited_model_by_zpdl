@@ -20,3 +20,7 @@
 * build: ^3.0.0
 * source_gen: ^3.0.0    
 * update README.md
+
+## 0.9.4
+
+* source_gen: ^3.1.0
