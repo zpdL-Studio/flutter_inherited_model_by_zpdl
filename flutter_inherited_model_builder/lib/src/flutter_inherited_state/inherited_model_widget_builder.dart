@@ -46,13 +46,9 @@ static bool asyncWorkingOf(BuildContext context) {
       ),
     );
     code.line();
-    code.write(
-      _buildInheritedModelConstructor(name, modelName),
-    );
+    code.write(_buildInheritedModelConstructor(name, modelName));
     code.line();
-    code.write(
-      _buildInheritedModelField(elementName),
-    );
+    code.write(_buildInheritedModelField(elementName));
     code.line();
     code.write('''
 @override

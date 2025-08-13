@@ -4,11 +4,11 @@ class CodeIndentWriter {
   final String _indentString;
 
   CodeIndentWriter({int indent = 0, String indentString = '  '})
-      : _indent = indent,
-        _indentString = indentString;
+    : _indent = indent,
+      _indentString = indentString;
 
   void _write(String object) {
-    if(object.isEmpty) {
+    if (object.isEmpty) {
       sb.writeln(object);
       return;
     }
@@ -25,11 +25,11 @@ class CodeIndentWriter {
   }
 
   void openIndent() {
-    _indent ++;
+    _indent++;
   }
 
   void closeIndent() {
-    _indent --;
+    _indent--;
   }
 
   void writeIndent(void Function(CodeIndentWriter codeWriter) onWrite) {

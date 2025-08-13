@@ -4,6 +4,7 @@ import 'package:flutter_inherited_model_builder/src/flutter_inherited_model_buil
 import 'package:flutter_inherited_model_builder/src/flutter_inherited_state_builder.dart';
 import 'package:source_gen/source_gen.dart';
 
+/// A builder that generates InheritedModel widgets.
 Builder flutterInheritedModelBuilder(BuilderOptions options) =>
     SharedPartBuilder([
       const FlutterInheritedModelBuilder(),

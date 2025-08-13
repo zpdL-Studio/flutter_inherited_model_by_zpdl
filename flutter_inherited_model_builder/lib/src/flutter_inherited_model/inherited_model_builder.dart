@@ -14,14 +14,25 @@ class InheritedModelBuilder {
     final code = CodeIndentWriter();
     code.write('class $name extends InheritedModel<int> {');
     code.openIndent();
-    code.write(_buildField(annotation, modelName, constructorParameters, fields));
-    code.line();
-    code.write(_buildConstruct(annotation, name, constructorParameters, fields));
-    code.line();
-    code.write(_buildUpdateShouldNotify(annotation, name, constructorParameters, fields));
+    code.write(
+      _buildField(annotation, modelName, constructorParameters, fields),
+    );
     code.line();
     code.write(
-      _buildUpdateShouldNotifyDependent(annotation, name, constructorParameters, fields),
+      _buildConstruct(annotation, name, constructorParameters, fields),
+    );
+    code.line();
+    code.write(
+      _buildUpdateShouldNotify(annotation, name, constructorParameters, fields),
+    );
+    code.line();
+    code.write(
+      _buildUpdateShouldNotifyDependent(
+        annotation,
+        name,
+        constructorParameters,
+        fields,
+      ),
     );
     code.line();
     code.closeIndent();

@@ -16,13 +16,15 @@ class InheritedModelStateBuilder {
   }) {
     final code = CodeIndentWriter();
     final mixins = StringBuffer();
-    if(annotation.useTickerProvider) {
+    if (annotation.useTickerProvider) {
       mixins.write('with TickerProviderStateMixin ');
-    } else if(annotation.useSingleTickerProvider) {
+    } else if (annotation.useSingleTickerProvider) {
       mixins.write('with SingleTickerProviderStateMixin ');
     }
 
-    code.write('class $name extends State<$inheritedModelName> ${mixins.toString()}{');
+    code.write(
+      'class $name extends State<$inheritedModelName> ${mixins.toString()}{',
+    );
     code.openIndent();
     code.write('late final $modelName _model;');
     if (annotation.useLifecycleState) {
@@ -101,7 +103,7 @@ _model._\$event = (e) async {
   };
 ''');
     }
-    if(annotation.useSingleTickerProvider || annotation.useTickerProvider) {
+    if (annotation.useSingleTickerProvider || annotation.useTickerProvider) {
       code.write('_model._\$tickerProvider = () => this;');
       code.line();
     }
@@ -191,7 +193,7 @@ Widget build(BuildContext context) {''');
       for (final e in fields) {
         code.write('${e.name}: _model.${e.name},');
       }
-      if(annotation.useAsyncWorker) {
+      if (annotation.useAsyncWorker) {
         code.write('asyncWorking: _model._asyncWorking,');
       }
       code.write('model: _model,');

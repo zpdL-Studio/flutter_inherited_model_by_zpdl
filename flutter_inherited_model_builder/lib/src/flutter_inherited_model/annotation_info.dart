@@ -31,8 +31,12 @@ class AnnotationInfo {
       useLifecycleState:
           useLifecycleState.isBool ? useLifecycleState.boolValue : false,
       useAsyncWorker: useAsyncWorker.isBool ? useAsyncWorker.boolValue : false,
-      useSingleTickerProvider: useSingleTickerProvider.isBool ? useSingleTickerProvider.boolValue : false,
-      useTickerProvider: useTickerProvider.isBool ? useTickerProvider.boolValue : false,
+      useSingleTickerProvider:
+          useSingleTickerProvider.isBool
+              ? useSingleTickerProvider.boolValue
+              : false,
+      useTickerProvider:
+          useTickerProvider.isBool ? useTickerProvider.boolValue : false,
       event: event.isNull ? null : event.typeValue,
     );
   }
