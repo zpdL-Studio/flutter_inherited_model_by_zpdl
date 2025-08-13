@@ -21,7 +21,7 @@ class MainModel with $MainModel {
 
   @override
   void onDispose() {
-    // TODO: implement onDispose
+    // dispose function
     super.onDispose();
   }
 
