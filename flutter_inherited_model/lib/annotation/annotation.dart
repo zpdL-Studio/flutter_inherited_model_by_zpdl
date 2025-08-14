@@ -115,10 +115,7 @@ final class FlutterInheritedState {
   final bool useAsyncWorker;
 
   /// {@macro flutter_inherited_model.flutter_inherited_state}
-  const FlutterInheritedState({
-    this.name,
-    this.useAsyncWorker = false,
-  });
+  const FlutterInheritedState({this.name, this.useAsyncWorker = false});
 }
 
 /// {@template flutter_inherited_model.inherited_model_state}
