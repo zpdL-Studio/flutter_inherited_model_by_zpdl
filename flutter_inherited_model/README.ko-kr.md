@@ -3,6 +3,8 @@
 [![pub package](https://img.shields.io/pub/v/flutter_inherited_model.svg)](https://pub.dev/packages/flutter_inherited_model)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+[ENGLISH](https://github.com/zpdL-Studio/flutter_inherited_model_by_zpdl/blob/main/flutter_inherited_model/README.md) | 한국어
+
 Flutter의 `InheritedModel`을 코드 생성(code generation) 기반으로 손쉽게 사용할 수 있도록 도와주는 상태 관리 패키지입니다.
 
 복잡한 설정 없이 간단한 어노테이션(@) 사용만으로 `InheritedModel`의 강력한 기능을 활용할 수 있으며, 상태 변화에 따라 정말 필요한 위젯만 리빌드하여 앱 성능을 최적화합니다.

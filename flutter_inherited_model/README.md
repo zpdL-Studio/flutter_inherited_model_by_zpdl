@@ -3,6 +3,8 @@
 [![pub package](https://img.shields.io/pub/v/flutter_inherited_model.svg)](https://pub.dev/packages/flutter_inherited_model)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+ENGLISH | [한국어](https://github.com/zpdL-Studio/flutter_inherited_model_by_zpdl/blob/main/flutter_inherited_model/README.ko-kr.md)
+
 A state management package that helps you easily use Flutter's `InheritedModel` based on code generation.
 
 You can leverage the powerful features of `InheritedModel` with simple annotation (@) usage without complex setup, and optimize app performance by rebuilding only the necessary widgets according to state changes.
@@ -180,7 +182,7 @@ class _MainPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Call the model's method
-          MainInheritedModel.model(context).increment();
+          MainInheritedModel.model(context).onIncrement();
           MainInheritedModel.model(context).onShowSnapBar('Increment');
         },
         tooltip: 'Increment',
@@ -352,6 +354,126 @@ class UserProfileWidget extends StatelessWidget {
           child: const Text('Update User'),
         ),
       ],
+    );
+  }
+}
+```
+
+## Async Processing and Loading State Management: `useAsyncWorker`
+
+With the `useAsyncWorker: true` option, you can use an `asyncWorker` that is managed in sync with the model's lifecycle. 
+This allows you to execute tasks that require a Future, such as network requests. You can also check the task's status through `InheritedModel.asyncWorkingOf(context)`.
+
+To improve the user experience, you can display the progress of an asynchronous task in the UI by checking the status with `InheritedModel.asyncWorkingOf(context)`.
+
+### 1. Enable `useAsyncWorker`
+
+Add `useAsyncWorker: true` to the `@FlutterInheritedModel` annotation.
+
+**lib/main_model.dart**
+```dart
+import 'package:flutter_inherited_model/flutter_inherited_model.dart';
+
+part 'main_model.g.dart';
+
+@FlutterInheritedModel(
+  name: 'MainInheritedModel',
+  useAsyncWorker: true, // Enable async worker
+)
+class MainModel with $MainModel {
+  MainModel._();
+  factory MainModel() = _$MainModel;
+  
+  @inheritedModelState
+  late String data;
+
+  @override
+  void onInitState() {
+    super.onInitState();
+    data = 'Press the button to fetch data.';
+  }
+
+  // Register a default handler for errors that occur when running an async function with asyncWorker.
+  @override
+  void Function(Object e, StackTrace stackTrace)? get asyncWorkerDefaultError => (e, stackTrace) {
+    emitEvent(MainModelSnackBarEvent(e.toString()));
+  };
+  
+  // Asynchronous data loading method
+  void onFetchData() {
+    asyncWorker(() async {
+      await Future.delayed(const Duration(seconds: 3));
+      data = 'Data fetched successfully!';
+    });
+  }
+
+  // Asynchronous data error method
+  // If an error handler is not provided, the asyncWorkerDefaultError function is called to handle the error.
+  void onFetchDataError() {
+    asyncWorker(() async {
+      await Future.delayed(const Duration(seconds: 3));
+      throw Exception('asyncWorker error');
+    });
+  }
+}
+```
+
+### 2. Configure the UI based on Loading State
+
+In the UI, subscribe to the `MainInheritedModel.asyncWorkingOf(context)` state. When it's `true`, display a loading indicator that covers the entire screen. Using a `Stack` widget makes it easy to add an overlay on top of the existing UI.
+
+**lib/main_page.dart**
+```dart
+class _MainPage extends StatelessWidget {
+  const _MainPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Async Worker Loading Example')),
+      body: Stack(
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Builder(builder: (context) {
+                  return Text(
+                    MainInheritedModel.dataOf(context),
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  );
+                }),
+                ElevatedButton(onPressed: () {
+                  MainInheritedModel.model(context).onFetchDataError();
+                }, child: Text('Fetch error')),
+              ],
+            ),
+          ),
+          /// Use a Builder to show the loading UI only when asyncWorking.
+          Builder(
+            builder: (context) {
+              final asyncWorking = MainInheritedModel.asyncWorkingOf(context);
+              if (!asyncWorking) {
+                return const SizedBox();
+              }
+              return Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.transparent,
+                alignment: AlignmentDirectional.center,
+                child: CircularProgressIndicator(),
+              );
+            },
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          MainInheritedModel.model(context).onFetchData();
+        },
+        tooltip: 'Fetch Data',
+        child: const Icon(Icons.cloud_download),
+      ),
     );
   }
 }
