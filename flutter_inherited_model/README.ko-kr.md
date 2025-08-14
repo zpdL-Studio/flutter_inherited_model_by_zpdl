@@ -3,42 +3,42 @@
 [![pub package](https://img.shields.io/pub/v/flutter_inherited_model.svg)](https://pub.dev/packages/flutter_inherited_model)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A state management package that helps you easily use Flutter's `InheritedModel` based on code generation.
+Flutter의 `InheritedModel`을 코드 생성(code generation) 기반으로 손쉽게 사용할 수 있도록 도와주는 상태 관리 패키지입니다.
 
-You can leverage the powerful features of `InheritedModel` with simple annotation (@) usage without complex setup, and optimize app performance by rebuilding only the necessary widgets according to state changes.
+복잡한 설정 없이 간단한 어노테이션(@) 사용만으로 `InheritedModel`의 강력한 기능을 활용할 수 있으며, 상태 변화에 따라 정말 필요한 위젯만 리빌드하여 앱 성능을 최적화합니다.
 
-This package must be used with `flutter_inherited_model_builder`.
+이 패키지는 `flutter_inherited_model_builder`와 함께 사용해야 합니다.
 
-## Key Features
+## 주요 기능
 
-- **Concise Syntax**: Automatically generates an `InheritedModel` widget with a single `@FlutterInheritedModel` annotation.
-- **Performance Optimization**: Automatically detects state fields and rebuilds only the widgets that depend on a specific state.
-- **Granular State Management**: You can define and manage another sub-state within the model using `@FlutterInheritedState`. This allows you to organize and separate complex state logic more systematically.
-- **Lifecycle Management**: You can directly manage widget lifecycle events such as `onInitState`, `onDispose`, and `onDidChangeAppLifecycleState` within the model class.
-- **Event Handling**: You can easily handle interactions between the model and the UI (e.g., showing a SnackBar, navigating pages) through the `Event` system.
-- **Asynchronous Task Support**: You can safely perform asynchronous tasks within the model with the `useAsyncWorker` option.
+- **간결한 구문**: `@FlutterInheritedModel` 어노테이션 하나로 `InheritedModel` 위젯을 자동 생성합니다.
+- **성능 최적화**: 상태(state) 필드를 자동으로 감지하여, 특정 상태에 의존하는 위젯만 리빌드합니다.
+- **세분화된 상태 관리**: `@FlutterInheritedState`를 사용하여 모델 내부에 또 다른 하위 상태(State)를 정의하고 관리할 수 있습니다. 이를 통해 복잡한 상태 로직을 더욱 체계적으로 구성하고 분리할 수 있습니다.
+- **생명주기(Lifecycle) 관리**: `onInitState`, `onDispose`, `onDidChangeAppLifecycleState` 등 위젯의 생명주기 이벤트를 모델 클래스 내에서 직접 관리할 수 있습니다.
+- **이벤트 처리**: `Event` 시스템을 통해 모델과 UI 간의 상호작용(예: SnackBar 표시, 페이지 이동)을 손쉽게 처리할 수 있습니다.
+- **비동기 작업 지원**: `useAsyncWorker` 옵션으로 모델 내에서 안전하게 비동기 작업을 수행할 수 있습니다.
 
-## Installation
+## 설치하기
 
-Add the following dependencies to your `pubspec.yaml` file.
+`pubspec.yaml` 파일에 아래와 같이 의존성을 추가해주세요.
 
 ```yaml
 dependencies:
-  flutter_inherited_model: ^0.9.5 # Please check the latest version on pub.dev.
+  flutter_inherited_model: ^0.9.5 # pub.dev에서 최신 버전을 확인해주세요.
 
 dev_dependencies:
-  flutter_inherited_model_builder: ^0.9.5 # Please check the latest version.
-  build_runner: ^2.5.4 # The build_runner version may be adjusted for compatibility.
+  flutter_inherited_model_builder: ^0.9.5 # 최신 버전을 확인해주세요.
+  build_runner: ^2.5.4 # build_runner 버전은 호환성에 맞게 조정될 수 있습니다.
 ```
 
-## Basic Usage
+## 기본 사용법
 
-### 1. Create a Model Class
+### 1. 모델 클래스 생성
 
-Create a class to manage the state and add the `@FlutterInheritedModel` annotation.
+상태를 관리할 클래스를 만들고 `@FlutterInheritedModel` 어노테이션을 붙여줍니다.
 
-- You must add the `part 'your_file.g.dart';` statement at the top of the file.
-- Add the `@inheritedModelState` annotation to the state fields you want to manage.
+- `part 'your_file.g.dart';` 구문을 파일 상단에 추가해야 합니다.
+- 관리할 상태 필드에는 `@inheritedModelState` 어노테이션을 추가합니다.
 
 **lib/main_model.dart**
 ```dart
@@ -46,46 +46,46 @@ import 'package:flutter_inherited_model/flutter_inherited_model.dart';
 
 part 'main_model.g.dart';
 
-// 1. Define the FlutterInheritedModel annotation
+// 1. FlutterInheritedModel annotation 정의
 @FlutterInheritedModel(
   name: 'MainInheritedModel',
   event: MainModelEvent,
 )
-// 2. Add the generated Mixin with the 'with' keyword.
+// 2. 생성될 Mixin을 with 키워드로 추가합니다.
 class MainModel with $MainModel {
-  // 3. Create a private constructor and a factory constructor that connects to the generated class.
+  // 3. private 생성자와 생성될 클래스를 연결하는 factory 생성자를 만듭니다.
   MainModel._();
   factory MainModel() = _$MainModel;
 
-  // 4. Specify the state to manage with the @inheritedModelState annotation.
+  // 4. @inheritedModelState 어노테이션으로 관리할 상태를 지정합니다.
   @inheritedModelState
   late int count;
 
-  // Lifecycle callback for model initialization
+  // 모델 초기화를 위한 생명주기 콜백
   @override
   void onInitState() {
     super.onInitState();
     count = 0;
   }
 
-  // Lifecycle callback for model disposal
+  // 모델이 종료될때 종료 생명주기 콜백
   @override
   void onDispose() {
     super.onDispose();
   }
 
-  // Method to change the model state
+  // 모델 상태를 변경하는 메소드
   void onIncrement() {
     count++;
   }
 
-  // Deliver UI Event
+  // UI Event 전달
   void onShowSnapBar(String message) {
     emitEvent(MainModelSnackBarEvent(message));
   }
 }
 
-// Define events for model-UI interaction
+// 모델과 UI의 상호작용을 위한 이벤트 정의
 sealed class MainModelEvent {}
 
 class MainModelSnackBarEvent implements MainModelEvent {
@@ -95,17 +95,17 @@ class MainModelSnackBarEvent implements MainModelEvent {
 }
 ```
 
-### 2. Run Code Generation
+### 2. 코드 생성 실행
 
-Run the following command in the root directory of your project to generate the code.
+프로젝트의 루트 디렉토리에서 아래 명령어를 실행하여 코드를 생성합니다.
 
 ```bash
 flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
-### 3. Provide the Model in the Widget Tree
+### 3. 위젯 트리에서 모델 제공하기
 
-Wrap the widget tree where you want to share the state with the generated `MainInheritedModel` widget.
+생성된 `MainInheritedModel` 위젯으로 상태를 공유할 위젯 트리를 감싸줍니다.
 
 ```dart
 void main() {
@@ -144,12 +144,12 @@ class MainPage extends StatelessWidget {
 }
 ```
 
-### 4. Use the State in the UI
+### 4. UI에서 상태 사용하기
 
-In child widgets, you can easily access the model and state using the generated static methods.
+하위 위젯에서는 생성된 static 메소드를 사용하여 모델과 상태에 쉽게 접근할 수 있습니다.
 
-- `MainInheritedModel.model(context)`: Accesses the model instance (for method calls, etc.).
-- `MainInheritedModel.countOf(context)`: Accesses the `count` state. The widget is rebuilt only when this state changes.
+- `MainInheritedModel.model(context)`: 모델 인스턴스에 접근합니다. (메소드 호출 등)
+- `MainInheritedModel.countOf(context)`: `count` 상태에 접근합니다. 이 상태가 변경될 때만 위젯이 리빌드됩니다.
 
 ```dart
 class _MainPage extends StatelessWidget {
@@ -164,8 +164,8 @@ class _MainPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
-            // Depends only on the 'count' state using countOf()
-            // A Builder was used to create a context to change only the Text Widget.
+            // countOf()를 사용하여 'count' 상태에만 의존
+            // Text Widget 만 변경을 위해 Builder로 context를 생성하였다.
             Builder(
               builder: (context) {
                 return Text(
@@ -179,7 +179,7 @@ class _MainPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Call the model's method
+          // 모델의 메소드 호출
           MainInheritedModel.model(context).increment();
           MainInheritedModel.model(context).onShowSnapBar('Increment');
         },
@@ -191,13 +191,13 @@ class _MainPage extends StatelessWidget {
 }
 ```
 
-## Advanced Usage: Managing Sub-states with @FlutterInheritedState
+## 고급 사용법: @FlutterInheritedState로 하위 상태 관리하기
 
-Sometimes, a model's state can become complex and have multiple responsibilities. Using `@FlutterInheritedState`, you can encapsulate related state and logic into a separate class to keep the model cleaner.
+때로는 모델의 상태가 복잡해져서 여러 책임을 가지게 될 수 있습니다. `@FlutterInheritedState`를 사용하면 관련된 상태와 로직을 별도의 클래스로 캡슐화하여 모델을 더 깔끔하게 유지할 수 있습니다.
 
-### 1. Define a Sub-state Class
+### 1. 하위 상태 클래스 정의
 
-Define a class to manage the sub-state using the `@FlutterInheritedState` annotation.
+`@FlutterInheritedState` 어노테이션을 사용하여 하위 상태를 관리할 클래스를 정의합니다.
 
 **lib/user_state.dart**
 ```dart
@@ -205,28 +205,28 @@ import 'package:flutter_inherited_model/flutter_inherited_model.dart';
 
 part 'user_state.g.dart';
 
-// 1. Define the FlutterInheritedState annotation
+// 1. FlutterInheritedState annotation 정의
 @FlutterInheritedState(name: 'UserInheritedState')
-// 2. Add the generated Mixin with the 'with' keyword.
+// 2. 생성될 Mixin을 with 키워드로 추가합니다.
 class UserState with $UserState {
-  // 3. Create a private constructor and a factory constructor that connects to the generated class.
+  // 3. private 생성자와 생성될 클래스를 연결하는 factory 생성자를 만듭니다.
   UserState._();
   factory UserState() = _$UserState;
 
-  // 4. Specify the state to manage with the @inheritedModelState annotation.
+  // 4. @inheritedModelState 어노테이션으로 관리할 상태를 지정합니다.
   @inheritedModelState
   late String name;
 
   @inheritedModelState
   late int age;
 
-  // Lifecycle callback when UserInheritedState is attached
+  // UserInheritedState에 attach 될때에 생명 주기 콜백
   @override
   void onAttachState() {
     super.onAttachState();
   }
 
-  // Lifecycle callback when UserInheritedState is detached
+  // UserInheritedState에 detach 될때에 생명 주기 콜백
   @override
   void onDetachState() {
     super.onDetachState();
@@ -234,45 +234,45 @@ class UserState with $UserState {
 }
 ```
 
-### 2. Include the Sub-state in the Main Model
+### 2. 메인 모델에 하위 상태 포함
 
-In the main model, declare `UserState`, which has the `@FlutterInheritedState` annotation, as a field. After building, you can access the state of `UserState` from the UI through the generated code (`_$MyModel.userStateOf(context)`).
+메인 모델에서 `@FlutterInheritedState`가 붙은 `UserState`를 필드로 선언합니다. 빌드 후 생성되는 코드(`_$MyModel.userStateOf(context)`)를 통해 UI에서 `UserState`의 상태에 접근할 수 있게 됩니다.
 
 **lib/main.dart**
 ```dart
-// ... (existing code)
+// ... (기존 코드)
 
 @FlutterInheritedModel(
   name: 'MainInheritedModel',
   // ...
 )
 class MainModel with $MainModel {
-  // ... (existing code)
+  // ... (기존 코드)
 
-  // Include UserState as a sub-state
+  // UserState를 하위 상태로 포함
   final userState = UserState();
 
   @override
   void onInitState() {
     super.onInitState();
     count = 0;
-    // Initialize sub-state
+    // 하위 상태 초기화
     userState.name = 'Gemini';
     userState.age = 1;
   }
 
   @override
   void onDispose() {
-    // The state must be disposed of on exit.
+    // 종료시 state를 폐기 시켜주어야 한다.
     userState.dispose();
     super.onDispose();
   }
 }
 
-// ... (rest of the code)
+// ... (나머지 코드)
 ```
-### 3. Provide the Model in the Widget Tree
-Wrap the widget tree where you want to share the state with the generated `UserInheritedState` widget.
+### 3. 위젯 트리에서 모델 제공하기
+생성된 `UserInheritedState` 위젯으로 상태를 공유할 위젯 트리를 감싸줍니다.
 
 ```dart
 class _MainPage extends StatelessWidget {
@@ -295,8 +295,8 @@ class _MainPage extends StatelessWidget {
                 );
               },
             ),
-            /// Add `UserInheritedState`. 
-            /// You can use `UserInheritedState` in `UserProfileWidget`.
+            /// `UserInheritedState` 추가. 
+            /// `UserProfileWidget` 에서 `UserInheritedState`를 사용할 수 있습니다.
             UserInheritedState(
                 state: MainInheritedModel
                     .model(context)
@@ -317,9 +317,9 @@ class _MainPage extends StatelessWidget {
   }
 }
 ```
-### 4. Use the Sub-state in the UI
+### 4. UI에서 하위 상태 사용하기
 
-Now, in the UI, you can access the `name` and `age` states of `UserState` through `UserInheritedState` and be rebuilt according to changes.
+이제 UI에서는 `UserInheritedState`을 통해 `UserState`의 `name`과 `age` 상태에도 접근하고 변화에 따라 리빌드될 수 있습니다.
 
 ```dart
 class UserProfileWidget extends StatelessWidget {
@@ -327,9 +327,9 @@ class UserProfileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Rebuild only when the name of UserState changes
+    // UserState의 name이 변경될 때만 리빌드
     final userName = UserInheritedState.nameOf(context);
-    // Rebuild only when the age of UserState changes
+    // UserState의 age가 변경될 때만 리빌드
     final userAge = UserInheritedState.ageOf(context);
 
     return Column(
@@ -344,7 +344,7 @@ class UserProfileWidget extends StatelessWidget {
         ),
         ElevatedButton(
           onPressed: () {
-            // Call the sub-state's method through the model
+            // 모델을 통해 하위 상태의 메소드 호출
             final model = UserInheritedState.model(context);
             model.name = 'Bard';
             model.age = 2;
@@ -357,6 +357,6 @@ class UserProfileWidget extends StatelessWidget {
 }
 ```
 
-## License
+## 라이선스
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+이 프로젝트는 MIT 라이선스를 따릅니다. 자세한 내용은 `LICENSE` 파일을 참고하세요.
