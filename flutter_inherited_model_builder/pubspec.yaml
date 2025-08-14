@@ -1,6 +1,6 @@
 name: flutter_inherited_model_builder
 description: "Code generator for flutter_inherited_model. This package automatically generates the necessary InheritedModel boilerplate code."
-version: 0.9.4
+version: 0.9.5
 homepage: https://github.com/zpdL-Studio/flutter_inherited_model_by_zpdl/tree/main/flutter_inherited_model_builder
 
 environment:
@@ -8,7 +8,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  flutter_inherited_model: ^0.9.1
+  flutter_inherited_model: ^0.9.5
 
   analyzer: ^7.7.1
   build: ^3.0.0

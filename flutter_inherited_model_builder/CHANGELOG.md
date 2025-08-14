@@ -24,3 +24,7 @@
 ## 0.9.4
 
 * source_gen: ^3.1.0
+
+## 0.9.5
+
+* flutter_inherited_model: ^0.9.5
