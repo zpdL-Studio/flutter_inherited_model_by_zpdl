@@ -13,6 +13,13 @@ mixin $MainModel {
 
   void onDispose() {}
 
+  void Function(Object e, StackTrace stackTrace)? asyncWorkerDefaultError;
+
+  void asyncWorker(
+    Future<void> Function() worker, [
+    void Function(Object e, StackTrace stackTrace)? error,
+  ]) => throw UnimplementedError('asyncWorker has not been implemented.');
+
   Future<dynamic> emitEvent(MainModelEvent event) =>
       throw UnimplementedError(
         'emitEvent(MainModelEvent event) has not been implemented.',
@@ -28,6 +35,14 @@ class MainInheritedModel extends StatefulWidget {
     return context.getInheritedWidgetOfExactType<_MainInheritedModel>()?.model;
   }
 
+  static bool asyncWorkingOf(BuildContext context) {
+    return InheritedModel.inheritFrom<_MainInheritedModel>(
+          context,
+          aspect: 2,
+        )?.asyncWorking ??
+        false;
+  }
+
   static int countOf(BuildContext context) => maybeCountOf(context)!;
 
   static int? maybeCountOf(BuildContext context) {
@@ -35,6 +50,15 @@ class MainInheritedModel extends StatefulWidget {
       context,
       aspect: 0,
     )?.count;
+  }
+
+  static String dataOf(BuildContext context) => maybeDataOf(context)!;
+
+  static String? maybeDataOf(BuildContext context) {
+    return InheritedModel.inheritFrom<_MainInheritedModel>(
+      context,
+      aspect: 1,
+    )?.data;
   }
 
   const MainInheritedModel({super.key, this.onEvent, required this.child});
@@ -65,6 +89,42 @@ class _$MainModel extends MainModel {
   @override
   set count(int value) {
     _setState(() => super.count = value);
+  }
+
+  @override
+  set data(String value) {
+    _setState(() => super.data = value);
+  }
+
+  int _$asyncWorkingCount = 0;
+
+  bool get _asyncWorking => _$asyncWorkingCount > 0;
+
+  @override
+  void asyncWorker(
+    Future<void> Function() worker, [
+    void Function(Object e, StackTrace stackTrace)? error,
+  ]) async {
+    final asyncWorking = _asyncWorking;
+    _$asyncWorkingCount++;
+    if (_asyncWorking != asyncWorking) {
+      try {
+        _setState(() {});
+      } catch (_) {}
+    }
+    try {
+      await worker();
+    } catch (e, stackTrace) {
+      (error ?? asyncWorkerDefaultError)?.call(e, stackTrace);
+    } finally {
+      final asyncWorking = _asyncWorking;
+      _$asyncWorkingCount--;
+      if (_asyncWorking != asyncWorking) {
+        try {
+          _setState(() {});
+        } catch (_) {}
+      }
+    }
   }
 
   Future<dynamic> Function(MainModelEvent)? _$event;
@@ -120,6 +180,8 @@ class _MainInheritedModelState extends State<MainInheritedModel> {
     _isFrameDraw = true;
     return _MainInheritedModel(
       count: _model.count,
+      data: _model.data,
+      asyncWorking: _model._asyncWorking,
       model: _model,
       child: widget.child,
     );
@@ -128,17 +190,23 @@ class _MainInheritedModelState extends State<MainInheritedModel> {
 
 class _MainInheritedModel extends InheritedModel<int> {
   final int count;
+  final String data;
+  final bool asyncWorking;
   final _$MainModel model;
 
   const _MainInheritedModel({
     required this.count,
+    required this.data,
+    required this.asyncWorking,
     required this.model,
     required super.child,
   });
 
   @override
   bool updateShouldNotify(_MainInheritedModel oldWidget) {
-    return count != oldWidget.count;
+    return count != oldWidget.count ||
+        data != oldWidget.data ||
+        asyncWorking != oldWidget.asyncWorking;
   }
 
   @override
@@ -147,6 +215,12 @@ class _MainInheritedModel extends InheritedModel<int> {
     Set<int> dependencies,
   ) {
     if (dependencies.contains(0) && count != oldWidget.count) {
+      return true;
+    }
+    if (dependencies.contains(1) && data != oldWidget.data) {
+      return true;
+    }
+    if (dependencies.contains(2) && asyncWorking != oldWidget.asyncWorking) {
       return true;
     }
     return false;

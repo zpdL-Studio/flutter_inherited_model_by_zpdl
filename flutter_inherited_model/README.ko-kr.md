@@ -357,6 +357,126 @@ class UserProfileWidget extends StatelessWidget {
 }
 ```
 
+## 비동기 처리와 로딩 상태 관리: `useAsyncWorker`
+
+`useAsyncWorker: true` 옵션을 사용하면 모델의 생명주기에 맞춰 관리되는 `asyncWorker`를 사용할 수 있습니다. 
+이를 통해 네트워크 요청등 Future가 필요한 작업을 실행할 수 있으며, `InheritedModel.asyncWorkingOf(context)`를 통해서 작업 상태를 추가 확인할 수 있습니다.
+
+비동기 작업의 진행 상태를 UI에 표시하기 위해 `InheritedModel.asyncWorkingOf(context)`를 통해서 작업 상태를 추가하여 사용자 경험을 향상할 수 있습니다.
+
+### 1. `useAsyncWorker` 활성화 및 로딩 상태 추가
+
+`@FlutterInheritedModel` 어노테이션에 `useAsyncWorker: true`를 추가하고, 로딩 상태를 관리할 `isLoading` 필드를 `@inheritedModelState`와 함께 선언합니다.
+
+**lib/main_model.dart**
+```dart
+import 'package:flutter_inherited_model/flutter_inherited_model.dart';
+
+part 'main_model.g.dart';
+
+@FlutterInheritedModel(
+  name: 'MainInheritedModel',
+  useAsyncWorker: true, // 비동기 워커 활성화
+)
+class MainModel with $MainModel {
+  MainModel._();
+  factory MainModel() = _$MainModel;
+  
+  @inheritedModelState
+  late String data;
+
+  @override
+  void onInitState() {
+    super.onInitState();
+    data = '버튼을 눌러 데이터를 가져오세요.';
+  }
+
+  // asyncWorker로 비동기 함수 실행시에 Error 발생시 Default 처리 함수 등록
+  @override
+  void Function(Object e, StackTrace stackTrace)? get asyncWorkerDefaultError => (e, stackTrace) {
+    emitEvent(MainModelSnackBarEvent(e.toString()));
+  };
+  
+  // 비동기 데이터 로딩 메소드
+  void onFetchData() {
+    asyncWorker(() async {
+      await Future.delayed(const Duration(seconds: 3));
+      data = '데이터 로딩 성공!';
+    });
+  }
+
+  // 비동기 데이터 에러 메소드
+  // error를 등록하지 않았을 경우에 asyncWorkerDefaultError 함수를 호출해서 에러를 처리한다.
+  void onFetchDataError() {
+    asyncWorker(() async {
+      await Future.delayed(const Duration(seconds: 3));
+      throw Exception('asyncWorker error');
+    });
+  }
+}
+```
+
+### 2. UI에서 로딩 상태에 따라 화면 구성
+
+UI에서는 `MainInheritedModel.asyncWorkingOf(context)` 상태를 구독하여 `true`일 때 화면 전체를 덮는 로딩 인디케이터를 표시합니다. `Stack` 위젯을 사용하면 기존 UI 위에 손쉽게 오버레이를 추가할 수 있습니다.
+
+**lib/main_page.dart**
+```dart
+class _MainPage extends StatelessWidget {
+  const _MainPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Async Worker 로딩 예제')),
+      body: Stack(
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Builder(builder: (context) {
+                  return Text(
+                    MainInheritedModel.dataOf(context),
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  );
+                }),
+                ElevatedButton(onPressed: () {
+                  MainInheritedModel.model(context).onFetchDataError();
+                }, child: Text('Fetch error')),
+              ],
+            ),
+          ),
+          /// Builder를 사용하여 asyncWorking 에만 로딩 UI 호출
+          Builder(
+            builder: (context) {
+              final asyncWorking = MainInheritedModel.asyncWorkingOf(context);
+              if (!asyncWorking) {
+                return const SizedBox();
+              }
+              return Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.transparent,
+                alignment: AlignmentDirectional.center,
+                child: CircularProgressIndicator(),
+              );
+            },
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          MainInheritedModel.model(context).onFetchData();
+        },
+        tooltip: 'Fetch Data',
+        child: const Icon(Icons.cloud_download),
+      ),
+    );
+  }
+}
+```
+
 ## 라이선스
 
 이 프로젝트는 MIT 라이선스를 따릅니다. 자세한 내용은 `LICENSE` 파일을 참고하세요.
